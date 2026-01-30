@@ -79,6 +79,9 @@ public class DroneSubsystem implements Runnable {
             Thread.sleep((long)(travelTime * 100));
 
             // Step 2: Arrive at zone
+            // Consume the previous drone response to unblock the drone
+            buffer.takeDroneResponse();
+            // Create a new response to update drone status.
             DroneResponse arrivedResponse = new DroneResponse(
                     zoneId, "ARRIVED",
                     "Arrived at Zone " + zoneId + ", opening nozzle...",
@@ -91,6 +94,7 @@ public class DroneSubsystem implements Runnable {
             Thread.sleep((long)(NOZZLE_TIME * 1000));
 
             // Step 3: Fight fire
+            buffer.takeDroneResponse();
             DroneResponse extinguishingResponse = new DroneResponse(
                     zoneId, "EXTINGUISHING",
                     "Dropping water at " + WATER_DROP_RATE + " L/s",
@@ -105,6 +109,7 @@ public class DroneSubsystem implements Runnable {
             Thread.sleep((long)(dropTime * 100));
 
             // Step 4: Fire extinguished
+            buffer.takeDroneResponse();
             DroneResponse completeResponse = new DroneResponse(
                     zoneId, "COMPLETED",
                     "Fire extinguished successfully",
@@ -115,6 +120,7 @@ public class DroneSubsystem implements Runnable {
             gui.updateDroneStatus("COMPLETED Zone " + zoneId);
 
             // Step 5: Return to base
+            buffer.takeDroneResponse();
             gui.updateDroneStatus("RETURNING to base");
             gui.log("[DRONE] Returning to base from Zone " + zoneId);
             // Simulate return travel
