@@ -80,4 +80,15 @@ exists and will be populated in future iterations.
 
 1) Clone the Repository
 2) Open in IntelliJ
+
 3) Run the project from main within IntelliJ
+
+---
+
+## UML Diagrams
+
+### Class Diagram
+![UML Class Diagram](UMLs/3303UML1.png)
+
+### Sequence Diagram
+![Sequence Diagram](UMLs/3303Sequence1.png)
