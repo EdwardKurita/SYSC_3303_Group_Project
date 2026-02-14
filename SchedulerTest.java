@@ -27,7 +27,7 @@ class SchedulerTest {
         // Create minimal fire subsystem for drone
         fireSubsystem = new FireIncidentSubsystem(buffer, gui, "events.csv", "zones.csv");
 
-        drone = new DroneSubsystem(buffer, fireSubsystem, gui);
+        drone = new DroneSubsystem(buffer, fireSubsystem, gui ,1);
         scheduler = new Scheduler(buffer, gui, drone);
     }
 
