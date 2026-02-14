@@ -3,7 +3,7 @@ import java.io.File;
 public class Main {
     public static void main(String[] args) {
         System.out.println("======================================");
-        System.out.println("FIREFIGHTING DRONE SYSTEM - ITERATION 1");
+        System.out.println("FIREFIGHTING DRONE SYSTEM - ITERATION 2");
         System.out.println("Group 12: Jiayi Han, Declan Koster, Shael Kotecha, Edward Kurita");
         System.out.println("======================================");
 
@@ -44,7 +44,7 @@ public class Main {
         }
 
         // Step 3: Create and start other threads
-        DroneSubsystem drone = new DroneSubsystem(buffer, fireSubsystem, gui);
+        DroneSubsystem drone = new DroneSubsystem(buffer, fireSubsystem, gui, 1);
         Scheduler scheduler = new Scheduler(buffer, gui, drone);
 
         Thread schedulerThread = new Thread(scheduler, "Scheduler");
