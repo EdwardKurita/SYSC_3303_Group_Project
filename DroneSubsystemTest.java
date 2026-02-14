@@ -13,7 +13,7 @@ class DroneSubsystemTest {
     @BeforeEach
     void setUp() {
         // Create with null dependencies for testing calculation methods
-        droneSubsystem = new DroneSubsystem(null, null, null);
+        droneSubsystem = new DroneSubsystem(null, null, null, 0);
     }
 
     @Test
