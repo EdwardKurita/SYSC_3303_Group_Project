@@ -1,0 +1,3 @@
+public enum DroneState {
+    IDLE, EN_ROUTE, ARRIVED, DROPPING_AGENT, COMPLETED, RETURNING
+}
