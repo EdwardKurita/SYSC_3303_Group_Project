@@ -18,6 +18,10 @@ public class FireDroneGUI extends JFrame {
     private Queue<String> logQueue;
     private final Object logLock = new Object(); // Lock object for synchronization
 
+    //Iteration 2
+    private JLabel activeFireLabel;
+    private int activeFireCount = 0;
+
     // Constructor (sets up the GUI) window
     public FireDroneGUI() {
         setTitle("Firefighting Drone System - Iteration 1");
@@ -39,9 +43,13 @@ public class FireDroneGUI extends JFrame {
         droneStatusLabel.setFont(new Font("Arial", Font.BOLD, 14));
         schedulerStatusLabel = new JLabel("Scheduler Status: Ready", JLabel.CENTER);
         schedulerStatusLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        //Iteration 2
+        activeFireLabel = new JLabel("Active Fires: 0", JLabel.CENTER);
+        activeFireLabel.setFont(new Font("Arial", Font.BOLD, 14));
 
         statusPanel.add(droneStatusLabel);
         statusPanel.add(schedulerStatusLabel);
+        statusPanel.add(activeFireLabel);
         add(statusPanel, BorderLayout.NORTH);
 
         // Center panel: log and events
@@ -165,6 +173,20 @@ public class FireDroneGUI extends JFrame {
     public void removeActiveZone(String zoneInfo) {
         SwingUtilities.invokeLater(() -> {
             zonesModel.removeElement(zoneInfo);
+        });
+    }
+
+    public void incrementActiveFires() {
+        SwingUtilities.invokeLater(() -> {
+            activeFireCount++;
+            activeFireLabel.setText("Active Fire: " + activeFireCount);
+        });
+    }
+
+    public void decrementActiveFires() {
+        SwingUtilities.invokeLater(() -> {
+            activeFireCount--;
+            activeFireLabel.setText("Active Fire: " + activeFireCount);
         });
     }
 }

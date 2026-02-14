@@ -81,6 +81,7 @@ public class FireIncidentSubsystem implements Runnable {
             FireEvent event = new FireEvent(time, zoneId, eventType, severity);
             gui.log("[FIRE] Detected: " + event);
             gui.updateEventList(event.toString());
+            gui.incrementActiveFires();
 
             // Put event into Synchronized buffer
             buffer.putFireEvent(event);
