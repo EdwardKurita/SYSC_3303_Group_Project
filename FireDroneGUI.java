@@ -1,7 +1,9 @@
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.List;
 
 //FireDroneGUI provides a thread-safe GUI for the firefighting drone system
 //Uses synchronized methods and wait/notify for thread-safe logging, demonstrating synchronization concepts
@@ -13,6 +15,7 @@ public class FireDroneGUI extends JFrame {
     private JLabel schedulerStatusLabel; // Shows scheduler status
     private JList<String> activeZonesList; // Shows active zone
     private DefaultListModel<String> zonesModel; // Data model for list
+    private ZoneMapPanel mapPanel;
 
     // Thread-safe logging queue using synchronized methods
     private Queue<String> logQueue;
@@ -22,15 +25,19 @@ public class FireDroneGUI extends JFrame {
     private JLabel activeFireLabel;
     private int activeFireCount = 0;
 
-    // Constructor (sets up the GUI) window
     public FireDroneGUI() {
+        this(new java.util.ArrayList<>());
+    }
+    // Constructor (sets up the GUI) window
+    public FireDroneGUI(List<FireIncidentZone> zones) {
         setTitle("Firefighting Drone System - Iteration 1");
-        setSize(800, 600);
+        setSize(1000, 1000);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new BorderLayout());
 
         logQueue = new LinkedList<>(); // Regular queue with synchronized access
         setupGUI();
+        loadZonesToGUI(zones);
         startLogProcessor();
         setVisible(true);
     }
@@ -75,12 +82,21 @@ public class FireDroneGUI extends JFrame {
         add(centerPanel, BorderLayout.CENTER);
 
         // Bottom panel: active zones
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+        bottomPanel.setPreferredSize(new Dimension(800, 300));
+
         JPanel zonesPanel = new JPanel(new BorderLayout());
-        zonesPanel.setBorder(BorderFactory.createTitledBorder("Active Zones"));
+        zonesPanel.setBorder(BorderFactory.createTitledBorder("Active Zones (List)"));
         zonesModel = new DefaultListModel<>();
         activeZonesList = new JList<>(zonesModel);
         zonesPanel.add(new JScrollPane(activeZonesList), BorderLayout.CENTER);
-        add(zonesPanel, BorderLayout.SOUTH);
+
+        mapPanel = new ZoneMapPanel();
+        mapPanel.setBorder(BorderFactory.createTitledBorder("Zone Map"));
+
+        bottomPanel.add(zonesPanel);
+        bottomPanel.add(mapPanel);
+        add(bottomPanel, BorderLayout.SOUTH);
     }
 
     //Starts background thread to process log messages
@@ -188,5 +204,74 @@ public class FireDroneGUI extends JFrame {
             activeFireCount--;
             activeFireLabel.setText("Active Fire: " + activeFireCount);
         });
+    }
+    // Load zones from subsystem into GUI
+    private void loadZonesToGUI(List<FireIncidentZone> zones) {
+        for (FireIncidentZone zone : zones) {
+            zonesModel.addElement(zone.toString());
+        }
+        mapPanel.setZones(zones);
+    }
+    class ZoneMapPanel extends JPanel {
+        private List<FireIncidentZone> zones = new ArrayList<>();
+        private static final int PADDING = 30;
+        private static final int WORLD_MAX_X = 2000;
+        private static final int WORLD_MAX_Y = 2000;
+
+        public void setZones(List<FireIncidentZone> zones) {
+            this.zones = zones;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g;
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            int w = getWidth() - 2 * PADDING;
+            int h = getHeight() - 2 * PADDING;
+
+            // Background grid
+            g2.setColor(new Color(220, 220, 220));
+            for (int i = 0; i <= 7; i++) {
+                int x = PADDING + i * w / 7;
+                int y = PADDING + i * h / 7;
+                g2.drawLine(x, PADDING, x, PADDING + h);
+                g2.drawLine(PADDING, y, PADDING + w, y);
+            }
+
+            // Draw each zone
+            for (FireIncidentZone zone : zones) {
+                int px1 = PADDING + zone.getX1() * w / WORLD_MAX_X;
+                int py1 = PADDING + zone.getY1() * h / WORLD_MAX_Y;
+                int px2 = PADDING + zone.getX2() * w / WORLD_MAX_X;
+                int py2 = PADDING + zone.getY2() * h / WORLD_MAX_Y;
+
+                int rectX = Math.min(px1, px2);
+                int rectY = Math.min(py1, py2);
+                int rectW = Math.abs(px2 - px1);
+                int rectH = Math.abs(py2 - py1);
+
+                // Fill
+                g2.setColor(new Color(173, 216, 230, 150));
+                g2.fillRect(rectX, rectY, rectW, rectH);
+
+                // Border
+                g2.setColor(Color.DARK_GRAY);
+                g2.setStroke(new BasicStroke(2));
+                g2.drawRect(rectX, rectY, rectW, rectH);
+
+                // Zone ID label
+                g2.setColor(Color.BLACK);
+                g2.setFont(new Font("Arial", Font.BOLD, 12));
+                g2.drawString("Z" + zone.getZoneId(), rectX + 4, rectY + 14);
+            }
+        }
+        @Override
+        public void addNotify() {
+            super.addNotify();
+            repaint();
+        }
     }
 }

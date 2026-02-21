@@ -64,7 +64,33 @@ public class FireIncidentSubsystem implements Runnable {
         reader.close();
         gui.log("Total zones loaded: " + zones.size());
     }
+    public List<FireIncidentZone> loadZones(String filename) {
+        List<FireIncidentZone> zones = new ArrayList<>();
 
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            br.readLine(); // skip header
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+
+                int id = Integer.parseInt(parts[0].trim());
+
+                String[] startCoords = parts[1].trim().replace("(", "").replace(")", "").split(";");
+                int x1 = Integer.parseInt(startCoords[0].trim());
+                int y1 = Integer.parseInt(startCoords[1].trim());
+
+                String[] endCoords = parts[2].trim().replace("(", "").replace(")", "").split(";");
+                int x2 = Integer.parseInt(endCoords[0].trim());
+                int y2 = Integer.parseInt(endCoords[1].trim());
+
+                zones.add(new FireIncidentZone(id, x1, y1, x2, y2));
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return zones;
+    }
     // Read fire events from event.csv and put them into the buffer
     private void readEvents() throws IOException, InterruptedException {
         BufferedReader reader = new BufferedReader(new FileReader(eventFilePath));

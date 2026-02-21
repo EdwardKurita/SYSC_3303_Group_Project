@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.List;
 
 public class Main {
     public static void main(String[] args) {
@@ -8,12 +9,11 @@ public class Main {
         System.out.println("======================================");
 
         // Step 1. File path setup
-        // Get current directory and build paths to CSV files
         String currentDir = System.getProperty("user.dir");
         String eventsPath = currentDir + File.separator + "data" + File.separator + "events.csv";
         String zonesPath = currentDir + File.separator + "data" + File.separator + "zones.csv";
 
-        // Check if required data file exist
+        // Check if required data files exist
         if (!new File(eventsPath).exists() || !new File(zonesPath).exists()) {
             System.err.println("ERROR: Data files not found.");
             System.err.println("Looking for events.csv at: " + eventsPath);
@@ -23,18 +23,27 @@ public class Main {
 
         System.out.println("Files found. Starting system...");
 
-        // Step 2. Initialize components
-        FireDroneGUI gui = new FireDroneGUI(); // GUI
-        SharedBuffer buffer = new SharedBuffer(); // Shared buffer for thread communication
+       //Load zones FIRST so GUI can display them
+        FireIncidentSubsystem zoneLoader =
+                new FireIncidentSubsystem(null, null, eventsPath, zonesPath);
 
-        // Fire subsystem loads events and zones from CSV
-        FireIncidentSubsystem fireSubsystem = new FireIncidentSubsystem(buffer, gui, eventsPath, zonesPath);
+        List<FireIncidentZone> zones = zoneLoader.loadZones(zonesPath);
 
-        // Start fire thread first (loads zones before drone missions)
+        //Create GUI with zones
+        FireDroneGUI gui = new FireDroneGUI(zones);
+
+        // Shared buffer for thread communication
+        SharedBuffer buffer = new SharedBuffer();
+
+        // Fire subsystem (actual one used by system)
+        FireIncidentSubsystem fireSubsystem =
+                new FireIncidentSubsystem(buffer, gui, eventsPath, zonesPath);
+
+        // Start fire thread first
         Thread fireThread = new Thread(fireSubsystem, "FireIncident");
         fireThread.start();
 
-        // Wait for zones to load (simulate loading time)
+        // Wait for zones to load
         try {
             System.out.println("Waiting for zones to load...");
             Thread.sleep(3000);
@@ -55,12 +64,11 @@ public class Main {
 
         // Step 4: Coordinate system execution
         try {
-            // Wait for fire thread to finish reading all CSV events
+
             fireThread.join();
             System.out.println("STEP 1: All events read from CSV file.");
             gui.log("All fire events loaded from CSV");
 
-            // Calculate and wait for ALL missions to complete
             System.out.println("\nSTEP 2: Waiting for drone to complete ALL missions");
             System.out.println("With 10x speedup simulation:");
             System.out.println("  • Zone 3 (High): ~18.6 seconds");
@@ -68,22 +76,20 @@ public class Main {
             System.out.println("  • Total: ~54.3 seconds");
             System.out.println("  • Adding safety margin: Waiting 90 seconds");
 
-            gui.log("️Waiting for drone to complete all missions (90 seconds)...");
+            gui.log("Waiting for drone to complete all missions (90 seconds)...");
 
-            // Simple countdown timer (update every 10 secs)
             for (int i = 90; i > 0; i -= 10) {
                 if (i % 30 == 0 || i <= 20) {
                     System.out.println("  [" + i + " seconds remaining]");
                     gui.log("[TIMER] " + i + " seconds remaining");
                 }
-                Thread.sleep(10000); // Sleep 10 secs at a time
+                Thread.sleep(10000);
             }
 
-            System.out.println("\n STEP 3: All missions should be complete");
+            System.out.println("\nSTEP 3: All missions should be complete");
             System.out.println("Allowing threads to finish naturally...");
             gui.log("All missions complete - system finishing...");
 
-            // Give threads extra time to warp up
             Thread.sleep(5000);
 
         } catch (InterruptedException e) {
@@ -98,7 +104,6 @@ public class Main {
         gui.log("SYSTEM COMPLETE - ALL REQUIREMENTS MET");
         gui.log("======================================");
 
-        // Keep GUI open for a bit so user can see final state
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
