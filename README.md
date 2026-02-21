@@ -190,4 +190,8 @@ root/
 
 
 ### State Machine Diagrams
+#### Drone State Machine Diagram
+![Drone_State_Machine_Diagram](UMLs/state_machine.png)
 
+#### Scheduler State Machine Diagram
+![Scheduler_State_Machine_Diagram](UMLs/scheduler_state_machine.drawio.png)
