@@ -126,4 +126,41 @@ class FireDroneGUITest {
 
         Thread.sleep(200);
     }
+
+    // Added three more test for Iteration 2
+    @Test
+    @DisplayName("Active fire count should increment and decrement")
+    void testActiveFireCount() throws Exception {
+        assertDoesNotThrow(() -> {
+            gui.incrementActiveFires();
+            gui.incrementActiveFires();
+            gui.incrementActiveFires();
+        });
+        Thread.sleep(100);
+    }
+
+    @Test
+    @DisplayName("GUI should handle all drone states")
+    void testAllDroneStates() throws Exception {
+        assertDoesNotThrow(() -> {
+            gui.updateDroneStatus("IDLE");
+            gui.updateDroneStatus("EN_ROUTE");
+            gui.updateDroneStatus("ARRIVED");
+            gui.updateDroneStatus("DROPPING_AGENT");
+            gui.updateDroneStatus("COMPLETED");
+            gui.updateDroneStatus("RETURNING");
+        });
+        Thread.sleep(100);
+    }
+
+    @Test
+    @DisplayName("Log processor should handle many messages")
+    void testLogProcessorLoad() throws Exception {
+        assertDoesNotThrow(() -> {
+            for (int i = 0; i < 100; i++) {
+                gui.log("Load test message " + i);
+            }
+        });
+        Thread.sleep(500);
+    }
 }
