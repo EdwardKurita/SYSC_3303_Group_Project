@@ -184,7 +184,7 @@ root/
 ### UML Diagrams
 
 ### Class Diagram
-
+![UML_Diagram_iter_2](UMLs/UML_iter_2.drawio.png)
 
 ### Sequence Diagram
 ![Sequence_Diagram_Iter_2](UMLs/sequence_diagram_iter_2.drawio.png)
