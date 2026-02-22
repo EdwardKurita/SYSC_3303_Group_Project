@@ -187,7 +187,7 @@ root/
 
 
 ### Sequence Diagram
-
+![Sequence_Diagram_Iter_2](UMLs/sequence_diagram_iter_2.drawio.png)
 
 ### State Machine Diagrams
 #### Drone State Machine Diagram
