@@ -77,6 +77,41 @@ public class Scheduler implements Runnable {
         return droneInfo.isAvailable();
     }
 
+    private void reQueuePartialFire(DroneResponse response) {
+        //get the mission that wasn't finished
+        FireEvent unfinishedFire = droneInfo.getCurrentMission();
+        if(unfinishedFire == null) return;
+
+        // calculate remaining water needed
+        double remainingWaterNeeded = unfinishedFire.getWaterNeeded() - response.getWaterUsed();
+        if(remainingWaterNeeded <= 0.1) {
+            gui.decrementActiveFires();
+            return;
+        }
+
+        //calculate new severity
+        String newSeverity = remainingWaterNeeded >= 25 ? "High" :
+                remainingWaterNeeded >= 15 ? "Moderate" : "Low";
+
+        //create new fire event with the reduced water needed
+        FireEvent partialFire = new FireEvent(
+                "Now",
+                unfinishedFire.getZoneId(),
+                "FIRE_DETECTED",
+                newSeverity
+        );
+
+        // add to queue
+        fireQueue.add(partialFire);
+
+        //log it
+        gui.log("[SCHEDULER] RE-QUEUED FIRE: Zone " + partialFire.getZoneId() + ", needs " + remainingWaterNeeded + "L more");
+
+        //update the fire event gui
+        gui.updateEventList("RE-QUEUED FIRE: Zone " + partialFire.getZoneId() + " (" + newSeverity + ", " + remainingWaterNeeded + "L)");
+
+    }
+
     private void dispatchNextFire() {
         FireEvent event = fireQueue.poll();
 
@@ -143,7 +178,7 @@ public class Scheduler implements Runnable {
             case "PARTIAL":
                 gui.log("[SCHEDULER] Fire partially extinguished in Zone " + zone);
                 gui.log("[SCHEDULER] " + response.getMessage());
-                //you would re-queue the fire with reduced water needs
+                reQueuePartialFire(response);
                 break;
 
             case "RETURNING":

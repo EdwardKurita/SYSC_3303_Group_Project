@@ -78,7 +78,7 @@ public class Main {
 
             gui.log("Waiting for drone to complete all missions (90 seconds)...");
 
-            for (int i = 90; i > 0; i -= 10) {
+            for (int i = 150; i > 0; i -= 10) {
                 if (i % 30 == 0 || i <= 20) {
                     System.out.println("  [" + i + " seconds remaining]");
                     gui.log("[TIMER] " + i + " seconds remaining");
