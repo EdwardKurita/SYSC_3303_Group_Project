@@ -1,115 +1,112 @@
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 import java.util.Queue;
+import java.io.*;
+import java.net.*;
 
 // Schedular coordinates between FireIncidentSubsystem and DroneSubsystem
 // It reads fire events from the buffer and assigns them to the drone, then listens fpr drone responses and updates the GUI
 public class Scheduler implements Runnable {
-    private SharedBuffer buffer;
-    private FireDroneGUI gui;
-    private DroneSubsystem drone;
+    // since we're switching off a shared buffer, we need to outline how packets and sockets are setup
+    static final int PORT_FIRE_SERVER     = 5000;
+    static final int PORT_SCHEDULER_FIRE  = 5001;
+    static final int PORT_SCHEDULER_DRONE = 5002;
+    static final int PORT_DRONE_BASE      = 6000; // each drone has a port of 600x where x is the id.
+
+    // packet types for preparing/receiving
+    private static final byte TYPE_FIRE_EVENT       = 0x01;
+    private static final byte TYPE_DRONE_ASSIGNMENT = 0x02;
+    private static final byte TYPE_DRONE_STATUS     = 0x03;
+    private static final byte TYPE_GUI_UPDATE       = 0x04;
+    private static final byte TYPE_SHUTDOWN         = 0x05;
+
+    private final Map<Integer, double[]> zoneCentres = new HashMap<>();
+
+    private final InetAddress serverAddress;
+    private final int maxDrones;
+
     private boolean running = true;
 
-    //Iteration 2
     private Queue<FireEvent> fireQueue = new LinkedList<>();
-    private DroneData droneInfo;
+    private final Map<Integer, DroneData> droneData = new HashMap<>();
+    private final Map<Integer, InetAddress> droneAddresses = new HashMap<>();
 
-    public Scheduler(SharedBuffer buffer, FireDroneGUI gui, DroneSubsystem drone) {
-        this.buffer = buffer;
-        this.gui = gui;
-        this.drone = drone;
+    private DatagramSocket fireSocket;
+    private DatagramSocket droneSocket;
 
-        //initialize DroneInfo for drone 1
-        this.droneInfo = new DroneData(drone.getDroneId());
+    public Scheduler(InetAddress serverAddress, int maxDrones, Map<Integer, double[]> zoneCentres) {
+        this.serverAddress = serverAddress;
+        this.maxDrones = maxDrones;
+        this.zoneCentres.putAll(zoneCentres);
     }
 
     @Override
     public void run() {
-        gui.log("=== Scheduler STARTED ===");
-        gui.log("[SCHEDULER] Managing Drone #" + droneInfo.getDroneId());
-        gui.updateSchedulerStatus("IDLE");
+        System.out.println("=== Scheduler STARTED ===");
+        System.out.println("Fire events  : port " + PORT_SCHEDULER_FIRE);
+        System.out.println("Drone status : port " + PORT_SCHEDULER_DRONE);
+        System.out.println("GUI updates  → " + serverAddress.getHostAddress() + ":" + PORT_FIRE_SERVER);
+        System.out.println("Zone centres loaded: " + zoneCentres.size());
 
         try {
-            // Initial delay to let other threads initialize
-            Thread.sleep(2000);
+            fireSocket = new DatagramSocket(PORT_SCHEDULER_FIRE);
+            droneSocket = new DatagramSocket(PORT_SCHEDULER_DRONE);
 
-            // Main scheduling loop
+            // if we don't use these it will get stuck in the running loop
+            // needs to jump out of waiting for a fire event or drone status
+            // if there is none
+            fireSocket.setSoTimeout(100);
+            fireSocket.setSoTimeout(100);
+
+            // timeout after 10 seconds
+            fireSocket.setSoTimeout(10000);
+            droneSocket.setSoTimeout(10000);
+
             while (running) {
-
-                //check for new fire events
-                if (buffer.hasFireEvent()) {
-                    FireEvent event = buffer.takeFireEvent();
-                    fireQueue.add(event);
-                    gui.log("===================================");
-                    gui.log("[SCHEDULER] Fire queued: " + event);
-                    gui.log("[SCHEDULER] Queue size: " + fireQueue.size());
-                    gui.log("===================================");
-                }
-
-                //check for drone status updates
-                if(buffer.hasDroneResponse()) {
-                    DroneResponse response = buffer.takeDroneResponse();
-                    handleDroneResponse(response);
-                }
-
-                //dispatch if possible
-                if(shouldDispatch()) {
-                    dispatchNextFire();
-                }
-
-                Thread.sleep(100);
+                // get fire events
+                // get drone statuses
+                // dispatch a drone
             }
-        } catch (InterruptedException e) {
-            gui.log("Scheduler finished");
+        } catch (Exception e) {
+            if (running) {
+                System.out.println("[ERROR] Scheduler: " + e.getMessage());
+            }
         }
 
-        gui.log("=== Scheduler FINISHED ===");
-    }
-
-    //check if we should dispatch more drones
-    public boolean shouldDispatch() {
-        return !fireQueue.isEmpty() && hasAvailableDrone();
-    }
-
-    //check if any drone is available
-    //Iteration 2: 1 drone
-    public boolean hasAvailableDrone() {
-        //Iteration 2
-        return droneInfo.isAvailable();
-    }
-
-    private void reQueuePartialFire(DroneResponse response) {
-        //get the mission that wasn't finished
-        FireEvent unfinishedFire = droneInfo.getCurrentMission();
-        if(unfinishedFire == null) return;
-
-        // calculate remaining water needed
-        double remainingWaterNeeded = unfinishedFire.getWaterNeeded() - response.getWaterUsed();
-        if(remainingWaterNeeded <= 0.1) {
-            gui.decrementActiveFires();
-            return;
+        if (fireSocket != null) {
+            fireSocket.close();
         }
 
-        //calculate new severity
-        String newSeverity = remainingWaterNeeded >= 25 ? "High" :
-                remainingWaterNeeded >= 15 ? "Moderate" : "Low";
+        if (droneSocket != null) {
+            droneSocket.close();
+        }
 
-        //create new fire event with the reduced water needed
-        FireEvent partialFire = new FireEvent(
-                "Now",
-                unfinishedFire.getZoneId(),
-                "FIRE_DETECTED",
-                newSeverity
-        );
+        System.out.println("=== Scheduler FINISHED ===");
+    }
 
-        // add to queue
-        fireQueue.add(partialFire);
+    private void getFireEvents() {
+        try {
+            byte[] data = new byte[1024];
+            DatagramPacket packet = new DatagramPacket(data, data.length);
+            fireSocket.receive(packet);
 
-        //log it
-        gui.log("[SCHEDULER] RE-QUEUED FIRE: Zone " + partialFire.getZoneId() + ", needs " + remainingWaterNeeded + "L more");
+            int len =  packet.getLength();
+            String received = new String(data, 0, len);
 
-        //update the fire event gui
-        gui.updateEventList("RE-QUEUED FIRE: Zone " + partialFire.getZoneId() + " (" + newSeverity + ", " + remainingWaterNeeded + "L)");
+            if (received.charAt(0) == TYPE_FIRE_EVENT) {
+                // [time, zoneId, eventType, severity]
+                String[] parsed = new String(data, 1, len).split(",");
 
+                FireEvent event = new FireEvent(parsed[0], Integer.parseInt(parsed[1]), parsed[2], parsed[3]);
+                System.out.println("Fire event: " + event);
+
+                // reroute drones
+            }
+
+        } catch (Exception e) {
+            System.out.println("[ERROR] Scheduler - getFireEvents: " + e.getMessage());
+        }
     }
 
     private void dispatchNextFire() {

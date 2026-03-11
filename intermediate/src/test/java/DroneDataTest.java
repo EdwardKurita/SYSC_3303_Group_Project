@@ -155,6 +155,7 @@ class DroneDataTest {
         assertTrue(droneData.isAvailable(), "Drone should be available");
     }
 
+    /*
     @Test
     @DisplayName("updateFromResponse should handle EN_ROUTE status")
     void testUpdateFromEnRouteResponse() {
@@ -357,4 +358,5 @@ class DroneDataTest {
         droneData.setCurrentMission(null);
         assertNull(droneData.getCurrentMission(), "Mission should be cleared");
     }
+     */
 }

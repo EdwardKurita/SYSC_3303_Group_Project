@@ -1,10 +1,12 @@
 public class DroneData{
-    private int droneId;
+    private final int droneId;
     private DroneState state;
     private double currentWater;
     private int currentZone;
     private FireEvent currentMission;
-
+    private double posX, posY;
+    private double targetX, targetY;
+    private int zonesServiced;
 
     private static final double TANK_CAPACITY = 15.0;
 
@@ -15,7 +17,11 @@ public class DroneData{
         this.currentWater = TANK_CAPACITY;
         this.currentZone = 0;
         this.currentMission = null;
-
+        this.posX = 0;
+        this.posY = 0;
+        this.targetX = 0;
+        this.targetY = 0;
+        this.zonesServiced = 0;
     }
 
     //getters and setters
@@ -34,6 +40,14 @@ public class DroneData{
     public void setCurrentMission(FireEvent currentMission) {
         this.currentMission = currentMission;
     }
+
+    public double getPosX() {return posX;}
+    public double getPosY() {return posY;}
+
+    public double getTargetX() {return targetX;}
+    public double getTargetY() {return targetY;}
+    public void setTarget(double x, double y) {this.targetX = x;this.targetY = y;}
+
 
     //HELPER FUNCTIONS
 
@@ -66,15 +80,21 @@ public class DroneData{
         this.currentZone = 0;
         this.currentMission = null;
         refill();
+        zonesServiced++;
     }
 
 
     //updates the drones data from DroneResponse message
-    public void updateFromResponse(DroneResponse response) {
-        switch (response.getStatus()) {
+    // now response is parsed from a packet, so instead of putting it into a response object it's just an array
+    // [droneId, zoneId, status, message, waterUsed, posX, posY]
+    public void updateFromResponse(String[] fields) {
+        posX =  Double.parseDouble(fields[5]);
+        posY =  Double.parseDouble(fields[6]);
+
+        switch (fields[2]) {
             case "EN_ROUTE":
                 this.state = DroneState.EN_ROUTE;
-                this.currentZone = response.getZoneId();
+                this.currentZone = Integer.parseInt(fields[1]);
                 break;
 
             case "ARRIVED":
@@ -86,9 +106,13 @@ public class DroneData{
                 break;
 
             case "COMPLETED":
+                this.state = DroneState.COMPLETED;
+                useWater(Double.parseDouble(fields[4]));
+                break;
+
             case "PARTIAL":
                 this.state = DroneState.COMPLETED;
-                useWater(response.getWaterUsed());
+                useWater(Integer.parseInt(fields[4]));
                 break;
 
             case "RETURNING":
