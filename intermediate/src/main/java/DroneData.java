@@ -5,8 +5,6 @@ public class DroneData{
     private int currentZone;
     private FireEvent currentMission;
     private double posX, posY;
-    private double targetX, targetY;
-    private int zonesServiced;
 
     private static final double TANK_CAPACITY = 15.0;
 
@@ -19,9 +17,6 @@ public class DroneData{
         this.currentMission = null;
         this.posX = 0;
         this.posY = 0;
-        this.targetX = 0;
-        this.targetY = 0;
-        this.zonesServiced = 0;
     }
 
     //getters and setters
@@ -43,10 +38,6 @@ public class DroneData{
 
     public double getPosX() {return posX;}
     public double getPosY() {return posY;}
-
-    public double getTargetX() {return targetX;}
-    public double getTargetY() {return targetY;}
-    public void setTarget(double x, double y) {this.targetX = x;this.targetY = y;}
 
 
     //HELPER FUNCTIONS
@@ -80,7 +71,6 @@ public class DroneData{
         this.currentZone = 0;
         this.currentMission = null;
         refill();
-        zonesServiced++;
     }
 
 
@@ -129,6 +119,7 @@ public class DroneData{
 
         }
     }
+
     @Override
     public String toString() {
         return String.format("Drone %d: %s, WaterAmount: %.1fL, Zone: %d", droneId, state, currentWater, currentZone);

@@ -22,6 +22,7 @@ public class Scheduler implements Runnable {
     private static final byte TYPE_SHUTDOWN         = 0x05;
 
     private final Map<Integer, double[]> zoneCentres = new HashMap<>();
+    private final Map<Integer, double[]> zoneBounds = new HashMap<>();
 
     private final InetAddress serverAddress;
     private final int maxDrones;
@@ -35,10 +36,11 @@ public class Scheduler implements Runnable {
     private DatagramSocket fireSocket;
     private DatagramSocket droneSocket;
 
-    public Scheduler(InetAddress serverAddress, int maxDrones, Map<Integer, double[]> zoneCentres) {
+    public Scheduler(InetAddress serverAddress, int maxDrones, Map<Integer, double[]> zoneCentres, Map<Integer, double[]> zoneBounds) {
         this.serverAddress = serverAddress;
         this.maxDrones = maxDrones;
         this.zoneCentres.putAll(zoneCentres);
+        this.zoneBounds.putAll(zoneBounds);
     }
 
     @Override
@@ -64,9 +66,9 @@ public class Scheduler implements Runnable {
             droneSocket.setSoTimeout(10000);
 
             while (running) {
-                // get fire events
-                // get drone statuses
-                // dispatch a drone
+                getFireEvents();
+                getDroneStatus();
+                dispatch();
             }
         } catch (Exception e) {
             if (running) {
@@ -101,7 +103,14 @@ public class Scheduler implements Runnable {
                 FireEvent event = new FireEvent(parsed[0], Integer.parseInt(parsed[1]), parsed[2], parsed[3]);
                 System.out.println("Fire event: " + event);
 
-                // reroute drones
+                if (!reroute(event)) {
+                    fireQueue.add(event);
+                    System.out.println("Fire queued");
+                }
+
+            } else if (received.charAt(0) == TYPE_SHUTDOWN) {
+                running = false;
+                System.out.println("Shut down triggered");
             }
 
         } catch (Exception e) {
@@ -109,99 +118,148 @@ public class Scheduler implements Runnable {
         }
     }
 
-    private void dispatchNextFire() {
-        FireEvent event = fireQueue.poll();
+    private void getDroneStatus() {
+        try {
+            byte[] data = new byte[1024];
+            DatagramPacket packet = new DatagramPacket(data, data.length);
+            droneSocket.receive(packet);
 
-        if  (event == null) {
+            int len =  packet.getLength();
+            String received = new String(data, 0, len);
+
+            if (received.charAt(0) == TYPE_DRONE_STATUS) {
+                String[] parsed = new String(data, 1, len).split(",");
+
+                int droneId = Integer.parseInt(parsed[0]);
+
+                // add new drones to the system if there are some
+                droneAddresses.putIfAbsent(droneId, packet.getAddress());
+                droneData.putIfAbsent(droneId, new DroneData(droneId));
+
+                DroneData drone = droneData.get(droneId);
+                drone.updateFromResponse(parsed);
+
+                double remaining = drone.getCurrentMission().getWaterNeeded() - Double.parseDouble(parsed[4]);
+                if (parsed[2].equals("PARTIAL") && remaining >= 1) {
+                    String severity;
+                    if (remaining >= 25) {
+                        severity = "High";
+                    } else if (remaining >= 15) {
+                        severity = "Moderate";
+                    } else {
+                        severity = "Low";
+                    }
+                    fireQueue.add(new FireEvent(parsed[0], Integer.parseInt(parsed[1]), parsed[2], severity));
+                }
+
+                try (DatagramSocket guiupdate = new DatagramSocket()) {
+                    byte[] payload = (drone.getDroneId() + "," + parsed[2] + "," + drone.getPosX() + "," + drone.getPosY() + "," + drone.getCurrentWater() + "," + drone.getCurrentZone() + "," + ((drone.getCurrentMission() != null) ? drone.getCurrentMission().getSeverity() : "NONE")).getBytes();
+                    byte[] guidata = new byte[payload.length + 1];
+
+                    guidata[0] = TYPE_GUI_UPDATE;
+                    System.arraycopy(payload, 0, guidata, 1, payload.length);
+
+                    guiupdate.send(new DatagramPacket(guidata, guidata.length, serverAddress, PORT_FIRE_SERVER));
+
+                } catch (Exception e) {
+                    System.out.println("[ERROR] Scheduler - getDroneStatus: " + e.getMessage());
+                }
+            }
+
+        } catch (Exception e) {
+            System.out.println("[ERROR] Scheduler - getDroneStatus: " + e.getMessage());
+        }
+    }
+
+    private boolean reroute(FireEvent newFire) {
+        double[] bounds = zoneBounds.get(newFire.getZoneId());
+
+        DroneData candidate = null;
+        for (DroneData drone : droneData.values()) {
+            FireEvent curDroneMission = drone.getCurrentMission();
+            if (curDroneMission != null && drone.getPosX() >= bounds[0] && drone.getPosX() <= bounds[2] && drone.getPosY() >= bounds[1] && drone.getPosY() <= bounds[3] ) {
+                candidate = drone;
+                break;
+            }
+        }
+
+        if (candidate == null) {
+            return false;
+        }
+
+        System.out.println("===================================================");
+        System.out.println("REROUTE");
+        System.out.println("Drone: " + candidate.getDroneId());
+        System.out.println("Now Servicing: " + newFire.getZoneId());
+        System.out.println("Re-inserting interrupted mission to queue");
+        System.out.println("===================================================");
+
+        fireQueue.add(candidate.getCurrentMission());
+
+        candidate.setCurrentMission(newFire);
+        candidate.setState(DroneState.EN_ROUTE);
+
+        // Send the mission to the drone
+        try (DatagramSocket assignment = new DatagramSocket()) {
+            int port = PORT_DRONE_BASE + candidate.getDroneId();
+            byte[] payload = (candidate.getDroneId() + "," + newFire.getTime() + "," +  newFire.getZoneId() + "," + newFire.getEventType() + "," + newFire.getSeverity()).getBytes();
+            byte[] data = new byte[payload.length + 1];
+
+            data[0] = TYPE_DRONE_ASSIGNMENT;
+            System.arraycopy(payload, 0, data, 1, payload.length);
+
+            assignment.send(new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), port));
+
+        } catch (Exception e) {
+            System.out.println("[ERROR] Scheduler - dispatch: " + e.getMessage());
+        }
+
+        return true;
+    }
+
+    private void dispatch() {
+        if (fireQueue.isEmpty()) {
             return;
         }
 
-        //Iteration 2: select the only drone
-        DroneData selectedDrone = droneInfo;
+        DroneData candidate = null;
 
-        gui.log("===================================");
-        gui.log("[SCHEDULER] Assigning New Mission ");
-        gui.log("[SCHEDULER]    Drone: #" +  selectedDrone.getDroneId());
-        gui.log("[SCHEDULER]    Zone: " +  event.getZoneId());
-        gui.log("[SCHEDULER]    Severity: " + event.getSeverity());
-        gui.log("[SCHEDULER]    Water Needed: " +  event.getWaterNeeded() + "L");
-        gui.log("[SCHEDULER]    Drone has: " +  selectedDrone.getCurrentWater() + "L");
-        gui.log("===================================");
-
-        //updates droneData
-        selectedDrone.setCurrentMission(event);
-        selectedDrone.setState(DroneState.EN_ROUTE);
-
-        //send to drone
-        gui.log("[SCHEDULER] -> Sending Command to Drone #" + selectedDrone.getDroneId());
-        drone.assignFire(event);
-        gui.log("[SCHEDULER] Command sent");
-        gui.log("[SCHEDULER] Fires remaining in queue:" + fireQueue.size());
-    }
-
-    private void handleDroneResponse(DroneResponse response) {
-        int zone = response.getZoneId();
-
-        //update GUI
-        gui.updateDroneStatus(response);
-
-        //update drone data
-        droneInfo.updateFromResponse(response);
-
-        //log details based on status
-        switch (response.getStatus()) {
-            case "EN_ROUTE":
-                gui.log("[SCHEDULER] Drone #" +  droneInfo.getDroneId() + " traveling to Zone " + zone);
-                gui.log("[SCHEDULER] " + response.getMessage());
+        for (DroneData drone : droneData.values()) {
+            if (drone.isAvailable()) {
+                candidate = drone;
                 break;
+            }
+        }
 
-            case "ARRIVED":
-                gui.log("[SCHEDULER] Drone #" +  droneInfo.getDroneId() + " arrived at Zone " + zone);
-                gui.log("[SCHEDULER] Preparing to extinguish...");
-                break;
+        if (candidate == null) {
+            return;
+        }
 
-            case "EXTINGUISHING":
-                gui.log("[SCHEDULER] Drone #" +  droneInfo.getDroneId() + " extinguishing fire in Zone " + zone);
-                gui.log("[SCHEDULER] " + response.getMessage());
-                break;
+        FireEvent event =  fireQueue.poll();
 
-            case "COMPLETED":
-                gui.log("[SCHEDULER] Fire extinguished in Zone " + zone);
-                gui.log("[SCHEDULER]    Water used: " + response.getWaterUsed() + "L");
-                gui.log("[SCHEDULER]    Drone water remaining: " + droneInfo.getCurrentWater() + "L");
-                gui.decrementActiveFires();
-                break;
+        System.out.println("================================================");
+        System.out.println("DISPATCH");
+        System.out.println("Drone: " + candidate.getDroneId());
+        System.out.println("Now Servicing: " + event.getZoneId());
+        System.out.println("Severity: " + event.getSeverity());
+        System.out.println("===================================================");
 
-            case "PARTIAL":
-                gui.log("[SCHEDULER] Fire partially extinguished in Zone " + zone);
-                gui.log("[SCHEDULER] " + response.getMessage());
-                reQueuePartialFire(response);
-                break;
+        candidate.setCurrentMission(event);
+        candidate.setState(DroneState.EN_ROUTE);
 
-            case "RETURNING":
-                gui.log("[SCHEDULER] Drone #" +  droneInfo.getDroneId() + " returning to base");
-                break;
+        // Send the mission to the drone
+        try (DatagramSocket assignment = new DatagramSocket()) {
+            int port = PORT_DRONE_BASE + candidate.getDroneId();
+            byte[] payload = (candidate.getDroneId() + "," + event.getTime() + "," +  event.getZoneId() + "," + event.getEventType() + "," + event.getSeverity()).getBytes();
+            byte[] data = new byte[payload.length + 1];
 
-            case "RETURNED":
-                gui.log("[SCHEDULER] Drone #" + droneInfo.getDroneId() + " returning to base and refilled");
-                gui.log("[SCHEDULER] Drone ready for next mission");
+            data[0] = TYPE_DRONE_ASSIGNMENT;
+            System.arraycopy(payload, 0, data, 1, payload.length);
 
-                if (!fireQueue.isEmpty()) {
-                    gui.log("[SCHEDULER] More missions in queue, dispatching...");
-                } else {
-                    gui.log("[SCHEDULER] No missions in queue, IDLE");
-                }
-                break;
+            assignment.send(new DatagramPacket(data, data.length, InetAddress.getByName("localhost"), port));
 
-            case "ERROR":
-                gui.logError("[SCHEDULER] DRONE ERROR: " + response.getMessage());
-                //could implement recovery logic
-                break;
-
-            default:
-                gui.logError("[SCHEDULER] Unknown drone state: " + response.getStatus());
-                break;
+        } catch (Exception e) {
+            System.out.println("[ERROR] Scheduler - dispatch: " + e.getMessage());
         }
     }
-
 }

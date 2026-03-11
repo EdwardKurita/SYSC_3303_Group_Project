@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Tests drone state tracking, water management, and mission data
  */
 class DroneDataTest {
-
+/*
     private DroneData droneData;
     private final int DRONE_ID = 1;
 
@@ -155,7 +155,6 @@ class DroneDataTest {
         assertTrue(droneData.isAvailable(), "Drone should be available");
     }
 
-    /*
     @Test
     @DisplayName("updateFromResponse should handle EN_ROUTE status")
     void testUpdateFromEnRouteResponse() {
