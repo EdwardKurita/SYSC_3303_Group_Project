@@ -1,6 +1,6 @@
 import java.net.*;
-\
-public class Main_intermediate {
+
+public class Main {
     public static void main(String[] args) throws Exception {
         System.out.println("==========================================");
         System.out.println(" SCHEDULER  (Intermediate Host)");

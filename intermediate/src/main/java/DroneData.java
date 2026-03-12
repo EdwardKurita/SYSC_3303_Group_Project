@@ -26,10 +26,8 @@ public class DroneData{
     public void setState(DroneState state) {this.state = state;}
 
     public double getCurrentWater() {return currentWater;}
-    public void setCurrentWater(double currentWater) {this.currentWater = currentWater;}
 
     public int getCurrentZone() {return currentZone;}
-    public void setCurrentZone(int currentZone) {this.currentZone = currentZone;}
 
     public FireEvent getCurrentMission() {return currentMission;}
     public void setCurrentMission(FireEvent currentMission) {
