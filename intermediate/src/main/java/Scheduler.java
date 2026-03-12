@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.io.*;
 import java.net.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 // Schedular coordinates between FireIncidentSubsystem and DroneSubsystem
 // It reads fire events from the buffer and assigns them to the drone, then listens fpr drone responses and updates the GUI
@@ -32,7 +31,7 @@ public class Scheduler implements Runnable {
     private Queue<FireEvent> fireQueue = new LinkedList<>();
     private final Map<Integer, DroneData> droneData = new HashMap<>();
     private final Map<Integer, InetAddress> droneAddresses = new HashMap<>();
-    private final Map<Integer, String> partialSeverity = new ConcurrentHashMap<>();
+    private final Map<Integer, String> partialSeverity = new HashMap<>();
 
     private DatagramSocket fireSocket;
     private DatagramSocket droneSocket;
@@ -136,24 +135,26 @@ public class Scheduler implements Runnable {
                 DroneData drone = droneData.get(droneId);
                 drone.updateFromResponse(parsed);
 
-                double remaining = drone.getCurrentMission().getWaterNeeded() - Double.parseDouble(parsed[4]);
-                if (parsed[2].equals("PARTIAL") && remaining >= 1) {
-                    String severity;
-                    if (remaining >= 25) {
-                        severity = "High";
-                    } else if (remaining >= 15) {
-                        severity = "Moderate";
-                    } else {
-                        severity = "Low";
+                if (drone.getCurrentMission() != null && parsed[2].equals("PARTIAL")) {
+                    double remaining = drone.getCurrentMission().getWaterNeeded() - Double.parseDouble(parsed[4]);
+                    if (remaining >= 1) {
+                        String severity;
+                        if (remaining >= 25) {
+                            severity = "High";
+                        } else if (remaining >= 15) {
+                            severity = "Moderate";
+                        } else {
+                            severity = "Low";
+                        }
+                        partialSeverity.put(droneId, severity);
+                        fireQueue.add(new FireEvent("Now", Integer.parseInt(parsed[1]), "FIRE_DETECTED", severity));
                     }
-                    fireQueue.add(new FireEvent(parsed[0], Integer.parseInt(parsed[1]), parsed[2], severity));
-                    partialSeverity.put(droneId, severity);
                 } else if (parsed[2].equals("RETURNED")) {
                     partialSeverity.remove(droneId);
                 }
 
                 try (DatagramSocket guiUpdate = new DatagramSocket()) {
-                    byte[] payload = (drone.getDroneId() + "," + parsed[2] + "," + drone.getPosX() + "," + drone.getPosY() + "," + drone.getCurrentWater() + "," + drone.getCurrentZone() + "," + ((drone.getCurrentMission() != null) ? drone.getCurrentMission().getSeverity() : "NONE")).getBytes();
+                    byte[] payload = (drone.getDroneId() + "," + parsed[2] + "," + drone.getPosX() + "," + drone.getPosY() + "," + drone.getCurrentWater() + "," + drone.getCurrentZone() + "," + (partialSeverity.containsKey(drone.getDroneId()) ? partialSeverity.get(drone.getDroneId()) : (parsed[2].equals("RETURNING") || parsed[2].equals("RETURNED") ? "NONE" : (drone.getCurrentMission() != null ? drone.getCurrentMission().getSeverity() : "NONE")))).getBytes();
                     byte[] guiData = new byte[payload.length + 1];
 
                     guiData[0] = TYPE_GUI_UPDATE;
@@ -173,6 +174,8 @@ public class Scheduler implements Runnable {
 
     private boolean reroute(FireEvent newFire) {
         double[] bounds = zoneBounds.get(newFire.getZoneId());
+
+        if (bounds == null) return false;
 
         DroneData candidate = null;
         for (DroneData drone : droneData.values()) {
@@ -202,7 +205,10 @@ public class Scheduler implements Runnable {
         // Send the mission to the drone
         try (DatagramSocket assignment = new DatagramSocket()) {
             int port = PORT_DRONE_BASE + candidate.getDroneId();
-            byte[] payload = (candidate.getDroneId() + "," + newFire.getTime() + "," +  newFire.getZoneId() + "," + newFire.getEventType() + "," + newFire.getSeverity()).getBytes();
+            double[] rBounds = zoneBounds.getOrDefault(newFire.getZoneId(), new double[]{0,0,0,0});
+            double rCx = (rBounds[0] + rBounds[2]) / 2.0;
+            double rCy = (rBounds[1] + rBounds[3]) / 2.0;
+            byte[] payload = (candidate.getDroneId() + "," + newFire.getTime() + "," +  newFire.getZoneId() + "," + newFire.getEventType() + "," + newFire.getSeverity() + "," + rCx + "," + rCy).getBytes();
             byte[] data = new byte[payload.length + 1];
 
             data[0] = TYPE_DRONE_ASSIGNMENT;

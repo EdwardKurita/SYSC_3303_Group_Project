@@ -27,7 +27,7 @@ public class DroneSubsystem implements Runnable {
     private static final byte TYPE_DRONE_STATUS = 0x03;
     private static final byte TYPE_SHUTDOWN = 0x05;
     static final int PORT_DRONE_BASE = 6000;
-    static final int PORT_SCHEDULER_DRONE = 6001;
+    static final int PORT_SCHEDULER_DRONE = 5002;
 
     private final InetAddress schedulerAddress;
     private final int listenPort;
@@ -65,9 +65,9 @@ public class DroneSubsystem implements Runnable {
                 if (buffer[0] == TYPE_DRONE_ASSIGNMENT) {
                     // fields: [droneId, time, zoneId, eventType, severity, centerX, centerY]
                     String[] fields = new String(buffer, 1, len - 1).split(",");
-                    
+
                     if (Integer.parseInt(fields[0]) != droneId) {
-                        continue; 
+                        continue;
                     }
 
                     FireEvent event = new FireEvent(fields[1], Integer.parseInt(fields[2]), fields[3], fields[4]);
@@ -129,7 +129,7 @@ public class DroneSubsystem implements Runnable {
             if (actualUsed >= waterNeeded) {
                 sendStatusPacket(socket, zoneId, "COMPLETED", "Fire extinguished", actualUsed);
             } else {
-                sendStatusPacket(socket, zoneId, "PARTIAL", String.format("Used %.1fL, needs %.1fL more", actualUsed, waterNeeded - actualUsed), actualUsed);
+                sendStatusPacket(socket, zoneId, "PARTIAL", String.format("Used %.1fL needs %.1fL more", actualUsed, waterNeeded - actualUsed), actualUsed);
             }
 
             // PHASE 5 – RETURNING
@@ -164,7 +164,7 @@ public class DroneSubsystem implements Runnable {
             posX = fromX + (toX - fromX) * t;
             posY = fromY + (toY - fromY) * t;
 
-            sendStatusPacket(socket, currentZoneId, state.name(), String.format("pos=(%.0f,%.0f)", posX, posY), 0.0);
+            sendStatusPacket(socket, currentZoneId, state.name(), String.format("pos=(%.0f;%.0f)", posX, posY), 0.0);
             Thread.sleep(stepMs);
         }
     }

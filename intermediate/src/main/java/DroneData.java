@@ -76,8 +76,8 @@ public class DroneData{
     // now response is parsed from a packet, so instead of putting it into a response object it's just an array
     // [droneId, zoneId, status, message, waterUsed, posX, posY]
     public void updateFromResponse(String[] fields) {
-        posX =  Double.parseDouble(fields[5]);
-        posY =  Double.parseDouble(fields[6]);
+        posX =  Double.parseDouble(fields[6]);
+        posY =  Double.parseDouble(fields[7]);
 
         switch (fields[2]) {
             case "EN_ROUTE":
@@ -99,8 +99,8 @@ public class DroneData{
                 break;
 
             case "PARTIAL":
-                this.state = DroneState.COMPLETED;
-                useWater(Integer.parseInt(fields[4]));
+                this.state = DroneState.PARTIAL;
+                useWater(Double.parseDouble(fields[4]));
                 break;
 
             case "RETURNING":

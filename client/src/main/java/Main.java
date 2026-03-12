@@ -2,8 +2,6 @@ import java.net.InetAddress;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        args = new String[2];
-        args[0] = "1";
         if (args.length < 1) {
             System.err.println("Usage: java -cp out Main <droneId> [schedulerHost]");
             System.exit(1);

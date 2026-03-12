@@ -24,7 +24,7 @@ public class GuiUpdateReceiver implements Runnable {
 
                 if (data[0] == TYPE_GUI_UPDATE) {
                     // fields: [droneId, status, posX, posY, waterRemaining, zoneId, severity]
-                    String[] parsed = new String(data, 0, len - 1).split(",");
+                    String[] parsed = new String(data, 1, len - 1).split(",");
 
                     int droneId = Integer.parseInt(parsed[0]);
                     String status = parsed[1];
