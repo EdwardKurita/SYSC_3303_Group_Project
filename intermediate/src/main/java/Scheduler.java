@@ -96,7 +96,7 @@ public class Scheduler implements Runnable {
             int len =  packet.getLength();
             String received = new String(data, 0, len);
 
-            if (received.charAt(0) == TYPE_FIRE_EVENT) {
+            if (data[0] == TYPE_FIRE_EVENT) {
                 // [time, zoneId, eventType, severity]
                 String[] parsed = new String(data, 1, len).split(",");
 
@@ -125,9 +125,8 @@ public class Scheduler implements Runnable {
             droneSocket.receive(packet);
 
             int len =  packet.getLength();
-            String received = new String(data, 0, len);
 
-            if (received.charAt(0) == TYPE_DRONE_STATUS) {
+            if (data[0] == TYPE_DRONE_STATUS) {
                 String[] parsed = new String(data, 1, len).split(",");
 
                 int droneId = Integer.parseInt(parsed[0]);

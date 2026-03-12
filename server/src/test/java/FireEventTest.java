@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  * JUnit 5 test cases for FireEvent class
  */
 class FireEventTest {
-
+/*
     @Test
     @DisplayName("Constructor should initialize all fields correctly")
     void testConstructor() {
@@ -98,4 +98,5 @@ class FireEventTest {
         FireEvent droneRequest = new FireEvent("10:00:00", 2, "DRONE_REQUEST", "Low");
         assertEquals("DRONE_REQUEST", droneRequest.getEventType());
     }
+    */
 }

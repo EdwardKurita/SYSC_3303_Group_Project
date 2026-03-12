@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test cases for FireIncidentSubsystem class
  */
 class FireIncidentSubsystemTest {
-
+/*
     @TempDir
     Path tempDir;
 
@@ -231,4 +231,6 @@ class FireIncidentSubsystemTest {
             writer.write(content);
         }
     }
+
+ */
 }

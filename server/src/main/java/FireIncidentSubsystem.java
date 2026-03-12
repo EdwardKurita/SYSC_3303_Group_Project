@@ -4,22 +4,31 @@ import java.util.*;
 
 // FireIncidentSubsystem reads fire events and zone data from CSV files
 public class FireIncidentSubsystem implements Runnable {
-    private SharedBuffer buffer;
-    private Map<Integer, Zone> zones;
-    private FireDroneGUI gui;
-    private String eventFilePath;
-    private String zoneFilePath;
+    static final int PORT_FIRE_SERVER = 5000; // gui updates
+    static final int PORT_SCHEDULER_FIRE = 5001; // send fires
+
+    // byte flags to add to and for parsing datapackets
+    private static final byte TYPE_ZONE_DATA = 0x00;
+    private static final byte TYPE_FIRE_EVENT = 0x01;
+    private static final byte TYPE_SHUTDOWN = 0x05;
+
+    private final Map<Integer, Zone> zones;
+    private final List<FireIncidentZone> zonesList;
+
+    private final FireDroneGUI gui;
+    private final String eventFilePath;
+    private final String zoneFilePath;
+
+    private final InetAddress intermediate;
 
     // Constructor
-    public FireIncidentSubsystem(SharedBuffer buffer,
-                                 FireDroneGUI gui,
-                                 String eventFilePath,
-                                 String zoneFilePath) {
-        this.buffer = buffer;  // CHANGE
+    public FireIncidentSubsystem(FireDroneGUI gui, String eventFilePath, String zoneFilePath, InetAddress intermediate) {// CHANGE
         this.gui = gui;
         this.eventFilePath = eventFilePath;
         this.zoneFilePath = zoneFilePath;
         this.zones = new HashMap<>();
+        this.zonesList = new ArrayList<>();
+        this.intermediate = intermediate;
     }
 
     @Override
@@ -27,9 +36,9 @@ public class FireIncidentSubsystem implements Runnable {
         try {
             gui.log("=== Fire Incident Subsystem STARTED ===");
             loadZones(); // Step 1: Load zone coordinates
-            readEvents(); // Step 2: Read and buffer fire events
+            sendZones();
+            sendFireEvents();
             gui.log("=== Fire Incident Subsystem FINISHED ===");
-
         } catch (Exception e) {
             gui.logError("Error in FireIncidentSubsystem: " + e.getMessage());
             e.printStackTrace();
@@ -65,7 +74,8 @@ public class FireIncidentSubsystem implements Runnable {
         reader.close();
         gui.log("Total zones loaded: " + zones.size());
     }
-    public List<FireIncidentZone> loadZones(String filename) {
+
+    public static List<FireIncidentZone> loadZonesForGUI(String filename) {
         List<FireIncidentZone> zones = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
@@ -92,34 +102,50 @@ public class FireIncidentSubsystem implements Runnable {
 
         return zones;
     }
-    // Read fire events from event.csv and put them into the buffer
-    private void readEvents() throws IOException, InterruptedException {
-        BufferedReader reader = new BufferedReader(new FileReader(eventFilePath));
-        String line = reader.readLine(); // Skip header
 
-        while ((line = reader.readLine()) != null) {
-            String[] parts = line.split(",");
-            String time = parts[0].trim();
-            int zoneId = Integer.parseInt(parts[1].trim());
-            String eventType = parts[2].trim();
-            String severity = parts[3].trim();
+    private void sendZones() {
+        try (DatagramSocket schedulerSocket = new DatagramSocket()) {
+            for (Zone zone : zones.values()) {
+                byte[] payload = (zone.getZoneId() + "," + zone.getStartX() + "," + zone.getStartY() + "," + zone.getEndX() + "," + zone.getEndY()).getBytes();
+                byte[] data = new byte[payload.length + 1];
+                data[0] = TYPE_ZONE_DATA;
+                System.arraycopy(payload, 0, data, 1, payload.length);
 
-            // Create FireEvent and log it
-            FireEvent event = new FireEvent(time, zoneId, eventType, severity);
-            gui.log("[FIRE] Detected: " + event);
-            gui.updateEventList(event.toString());
-            gui.incrementActiveFires();
-
-            // Put event into Synchronized buffer
-            buffer.putFireEvent(event);
-            // Delay to simulate time between fire detections
-            Thread.sleep(1000);
+                schedulerSocket.send(new DatagramPacket(data, data.length, intermediate, PORT_SCHEDULER_FIRE));
+                gui.log("[ZONE] Sent Zone Data: " + new String(data));
+            }
+        } catch (Exception e) {
+            System.out.println("[ERROR] FireIncidentSubsystem - sendZones" + e.getMessage());
         }
-        reader.close();
     }
 
-    // Return the Zone obj for a given zoneId
-    public Zone getZone(int zoneId) {
-        return zones.get(zoneId);
+    private void sendFireEvents() {
+        try (DatagramSocket schedulerSocket = new DatagramSocket(); BufferedReader br = new BufferedReader(new FileReader(eventFilePath))) {
+            br.readLine(); // get the headerr
+            String line;
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+
+                String time = parts[0].trim();
+                int zoneId = Integer.parseInt(parts[1].trim());
+                String eventType = parts[2].trim();
+                String severity = parts[3].trim();
+
+                FireEvent event = new FireEvent(time, zoneId, eventType, severity);
+                gui.log("[FIRE] Detected: " + event);
+                gui.updateEventList(event.toString());
+                gui.incrementActiveFires();
+
+                byte[] payload = (time +  "," + zoneId + "," + eventType + "," + severity).getBytes();
+                byte[] data = new byte[payload.length + 1];
+                data[0] = TYPE_FIRE_EVENT;
+                System.arraycopy(payload, 0, data, 1, payload.length);
+
+                schedulerSocket.send(new DatagramPacket(data, data.length, intermediate, PORT_SCHEDULER_FIRE));
+                gui.log("[FIRE] Sent Fire Event Data: " + new String(data));
+            }
+        } catch (Exception e) {
+            System.out.println("[ERROR] FireIncidentSubsystem - sendFireEvents" + e.getMessage());
+        }
     }
 }

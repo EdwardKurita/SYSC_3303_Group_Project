@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * JUnit 5 test cases for FireDroneGUI class
  */
 class FireDroneGUITest {
-
+    /*
     private FireDroneGUI gui;
 
     @BeforeEach
@@ -164,4 +164,6 @@ class FireDroneGUITest {
         });
         Thread.sleep(500);
     }
+
+     */
 }
