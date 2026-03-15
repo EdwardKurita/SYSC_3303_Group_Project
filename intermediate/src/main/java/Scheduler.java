@@ -27,7 +27,7 @@ public class Scheduler implements Runnable {
 
     private final InetAddress serverAddress;
 
-    private boolean running = true;
+    boolean running = true;
 
     private Queue<FireEvent> fireQueue = new LinkedList<>();
     private final Map<Integer, DroneData> droneData = new HashMap<>();
