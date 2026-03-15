@@ -2,6 +2,8 @@ import java.net.*;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import main.java.DroneState;
+
 // DroneSubsystem simulates the drone's behavior
 // Traveling to zones, Fighting fires and Returning to base
 public class DroneSubsystem implements Runnable {
@@ -54,11 +56,16 @@ public class DroneSubsystem implements Runnable {
             // Register with Scheduler so it knows our address
             sendStatusPacket(socket, 0, "IDLE", "Drone online, ready for assignments", 0.0);
 
-            while (true) {
+            while (running) {
                 // Block here until the next assignment arrives
                 byte[] buffer = new byte[1024];
                 DatagramPacket packet = new DatagramPacket(buffer, buffer.length);
-                socket.receive(packet);
+
+                try {
+                    socket.receive(packet);
+                } catch (SocketTimeoutException e) {
+                    continue;
+                }
 
                 int len = packet.getLength();
 
@@ -105,46 +112,85 @@ public class DroneSubsystem implements Runnable {
             System.out.println("[DRONE-" + droneId + "] STARTING MISSION: Zone " + zoneId + " (" + severity + ")");
             System.out.println("[DRONE-" + droneId + "]===================================");
 
-            // PHASE 1 – EN_ROUTE
             transition(DroneState.EN_ROUTE);
-            currentZoneId = zoneId;
-            animatePosition(socket, posX, posY, targetX, targetY, travelMs);
 
-            // PHASE 2 – ARRIVED
-            transition(DroneState.ARRIVED);
-            posX = targetX;
-            posY = targetY;
-            sendStatusPacket(socket, zoneId, "ARRIVED", "Arrived at Zone " + zoneId, 0.0);
-            Thread.sleep((long) (NOZZLE_TIME * 1000));
+            double actualUsed = 0;
 
-            // PHASE 3 – EXTINGUISHING
-            transition(DroneState.DROPPING_AGENT);
-            double actualUsed = Math.min(waterNeeded, currentWater);
-            currentWater -= actualUsed;
-            sendStatusPacket(socket, zoneId, "EXTINGUISHING", "Dropping water at " + WATER_DROP_RATE + " L/s", 0.0);
-            Thread.sleep((long) (dropTime * 100));
+            while (state != DroneState.IDLE) {
+                switch (state) {
+                    case EN_ROUTE:
+                        try {
+                            currentZone = zoneId;
+                            animatePosition(socket, posX, posY, targetX, targetY, travelMs);
+                            transition(DroneState.ARRIVED);
+                        } catch (Exception e) {
+                            System.out.println("[Drone-" + droneId + "] Fault in EN_ROUTE: " + e.getMessage());
+                            transition(DroneState.FAULTED);
+                        }
+                        break;
 
-            // PHASE 4 – ASSESSMENT
-            transition(DroneState.COMPLETED);
-            if (actualUsed >= waterNeeded) {
-                sendStatusPacket(socket, zoneId, "COMPLETED", "Fire extinguished", actualUsed);
-            } else {
-                sendStatusPacket(socket, zoneId, "PARTIAL", String.format("Used %.1fL needs %.1fL more", actualUsed, waterNeeded - actualUsed), actualUsed);
+                    case ARRIVED:
+                        try {
+                            posX = targetX;
+                            posY = targetY;
+                            sendStatusPacket(socket, zoneId, "ARRIVED", "Arrived at Zone " + zoneId, 0.0);
+                            transition(DroneState.DROPPING_AGENT);
+                        } catch (Exception e) {
+                            System.out.println("[Drone-" + droneId + "] Fault in ARRIVED: " + e.getMessage());
+                            transition(DroneState.FAULTED);
+                        }
+                        break;
+
+                    case DROPPING_AGENT:
+                        try {
+                            actualUsed = Math.min(waterNeeded, currentWater);
+                            currentWater -= actualUsed;
+                            sendStatusPacket(socket, zoneId, "EXTINGUISHING", "Dropping water at " + WATER_DROP_RATE + " L/s", 0.0);
+                            Thread.sleep((long) (dropTime * 100));
+                            if (actualUsed >= waterNeeded) {
+                                transition(DroneState.COMPLETED);
+                            } else {
+                                transition(DroneState.PARTIAL);
+                            }
+                        } catch (Exception e) {
+                            System.out.println("[Drone-" + droneId + "] Fault in DROPPING_AGENT: " + e.getMessage());
+                            transition(DroneState.FAULTED);
+                        }
+                        break;
+
+                    case COMPLETED:
+                        //If you completely extinguish the fire the amount of water used is the amount needed
+                        sendStatusPacket(socket, zoneId, "COMPLETED", "Fire extinguished", actualUsed);
+                        transition(DroneState.RETURNING);
+                        break;
+
+                    case PARTIAL:
+                        sendStatusPacket(socket, zoneId, "PARTIAL", String.format("Used %.1fL needs %.1fL more", actualUsed, waterNeeded - actualUsed), actualUsed);
+                        transition(DroneState.RETURNING);
+                        break;
+
+                    case RETURNING:
+                        try {
+                            sendStatusPacket(socket, zoneId, "RETURNING", "Returning to base", 0.0);
+                            animatePosition(socket, posX, posY, 0, 0, travelMs);
+                            currentWater = TANK_CAPACITY;
+                            currentZoneId = 0;
+                            posX = 0;
+                            posY = 0;
+                            transition(DroneState.IDLE);
+                            sendStatusPacket(socket, 0, "RETURNED", "Refilled and ready", 0.0);
+                            System.out.println("[DRONE-" + droneId + "] MISSION COMPLETE. Waiting for next assignment.");
+                        } catch (Exception e) {
+                            System.out.println("[Drone-" + droneId + "] Fault in RETURNING: " + e.getMessage());
+                            transition(DroneState.FAULTED);
+                        }
+                        break;
+
+                    case FAULTED:
+                        sendStatusPacket(socket, zoneId, "FAULTED", "Something Has Happened", 0.0);
+                        break;
+                }
             }
-
-            // PHASE 5 – RETURNING
-            transition(DroneState.RETURNING);
-            sendStatusPacket(socket, zoneId, "RETURNING", "Returning to base", 0.0);
-            animatePosition(socket, posX, posY, 0, 0, travelMs);
-
-            // PHASE 6 – RETURNED / IDLE
-            currentWater = TANK_CAPACITY;
-            currentZoneId = 0;
-            posX = 0;
-            posY = 0;
-            transition(DroneState.IDLE);
-            sendStatusPacket(socket, 0, "RETURNED", "Refilled and ready", 0.0);
-            System.out.println("[DRONE-" + droneId + "] MISSION COMPLETE. Waiting for next assignment.");
         } catch (Exception e) {
             System.out.println("[ERROR] Drone-" + droneId + ": " + e.getMessage());
         }
