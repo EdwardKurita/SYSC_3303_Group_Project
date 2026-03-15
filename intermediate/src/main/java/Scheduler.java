@@ -77,8 +77,6 @@ public class Scheduler implements Runnable {
                         boolean dispatched = dispatch();
                         if (dispatched) {
                             transition(SchedulerState.MONITORING);
-                        } else {
-                            transition(SchedulerState.WAITING);
                         }
                         break;
 
@@ -98,7 +96,6 @@ public class Scheduler implements Runnable {
                         break;
 
                 }
-                dispatch();
             }
         } catch (Exception e) {
             if (running) {
