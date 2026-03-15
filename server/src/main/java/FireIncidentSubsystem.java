@@ -21,6 +21,8 @@ public class FireIncidentSubsystem implements Runnable {
 
     private final InetAddress intermediate;
 
+    private FireIncidentState state = FireIncidentState.LOADING;
+
     // Constructor
     public FireIncidentSubsystem(FireDroneGUI gui, String eventFilePath, String zoneFilePath, InetAddress intermediate) {// CHANGE
         this.gui = gui;
@@ -33,16 +35,50 @@ public class FireIncidentSubsystem implements Runnable {
 
     @Override
     public void run() {
-        try {
-            gui.log("=== Fire Incident Subsystem STARTED ===");
-            loadZones(); // Step 1: Load zone coordinates
-            sendZones();
-            sendFireEvents();
-            gui.log("=== Fire Incident Subsystem FINISHED ===");
+        gui.log("=== Fire Incident Subsystem STARTED ===");
+
+        try (DatagramSocket socket = new DatagramSocket()) {
+            while (state != FireIncidentState.DONE) {
+                switch (state) {
+                    case LOADING:
+                        try {
+                            loadZones();
+                            transition(FireIncidentState.SENDING);
+                        } catch (Exception e) {
+                            gui.logError("Error in LOADING:" + e.getMessage());
+                            transition(FireIncidentState.DONE);
+                        }
+                        break;
+
+                    case SENDING:
+                        try {
+                            sendZones();
+                            sendFireEvents();
+                            transition(FireIncidentState.WAITING);
+                        } catch (Exception e) {
+                            gui.logError("Error in SENDING:" + e.getMessage());
+                            transition(FireIncidentState.DONE);
+                        }
+                        break;
+
+                    case WAITING:
+                        try {
+                            gui.log("[FIRE] waiting for all fires to be extinguished...");
+                            while (gui.getActiveFireCount() > 0) {
+                                Thread.sleep(500);
+                            }
+                            transition(FireIncidentState.DONE);
+                        } catch (Exception e) {
+                            gui.logError("Error in WAITING:" + e.getMessage());
+                            transition(FireIncidentState.DONE);
+                        }
+                        break;
+                }
+            }
         } catch (Exception e) {
             gui.logError("Error in FireIncidentSubsystem: " + e.getMessage());
-            e.printStackTrace();
         }
+        gui.log("=== Fire Incident Subsystem FINISHED ===");
     }
 
     // Loads zone data fron zones.csv (x1;y1) (x2;y2)
@@ -135,6 +171,7 @@ public class FireIncidentSubsystem implements Runnable {
                 gui.log("[FIRE] Detected: " + event);
                 gui.updateEventList(event.toString());
                 gui.incrementActiveFires();
+                gui.updateZoneFire(zoneId, severity);
 
                 byte[] payload = (time +  "," + zoneId + "," + eventType + "," + severity).getBytes();
                 byte[] data = new byte[payload.length + 1];
@@ -147,5 +184,10 @@ public class FireIncidentSubsystem implements Runnable {
         } catch (Exception e) {
             System.out.println("[ERROR] FireIncidentSubsystem - sendFireEvents" + e.getMessage());
         }
+    }
+
+    private void transition(FireIncidentState next) {
+        gui.log("[FIRE] " + state + " -> " + next);
+        state = next;
     }
 }

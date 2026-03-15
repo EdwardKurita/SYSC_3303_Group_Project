@@ -141,6 +141,9 @@ public class FireDroneGUI extends JFrame {
         });
     }
 
+    public int getActiveFireCount() {
+        return activeFireCount;
+    }
 
     public void updateDroneMarker(int droneId, String status, double posX, double posY, double waterRemaining, int zoneId, String severity) {
         droneMarkers.put(droneId, new DroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity));
@@ -255,4 +258,12 @@ public class FireDroneGUI extends JFrame {
             };
         }
     }
+
+    public void updateZoneFire(int zoneId, String severity) {
+        SwingUtilities.invokeLater(() -> {
+            activeFireSeverity.put(zoneId, severity);
+            mapPanel.setActiveFireSeverity(activeFireSeverity);
+        });
+    }
+
 }
