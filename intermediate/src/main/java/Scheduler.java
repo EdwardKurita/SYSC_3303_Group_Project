@@ -1,8 +1,9 @@
+import main.java.DroneState;
+
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
-import java.io.*;
 import java.net.*;
 
 // Schedular coordinates between FireIncidentSubsystem and DroneSubsystem
@@ -36,6 +37,8 @@ public class Scheduler implements Runnable {
     private DatagramSocket fireSocket;
     private DatagramSocket droneSocket;
 
+    private SchedulerState schedulerState = SchedulerState.WAITING;
+
     public Scheduler(InetAddress serverAddress) {
         this.serverAddress = serverAddress;
     }
@@ -62,6 +65,39 @@ public class Scheduler implements Runnable {
             while (running) {
                 getFireEvents();
                 getDroneStatus();
+
+                switch(schedulerState){
+                    case WAITING:
+                        if (!fireQueue.isEmpty()) {
+                            transition(SchedulerState.DISPATCHING);
+                        }
+                        break;
+
+                    case DISPATCHING:
+                        boolean dispatched = dispatch();
+                        if (dispatched) {
+                            transition(SchedulerState.MONITORING);
+                        } else {
+                            transition(SchedulerState.WAITING);
+                        }
+                        break;
+
+                    case MONITORING:
+                        if (hasFault()) {
+                            transition(SchedulerState.FAULT_HANDLING);
+                        } else if (!fireQueue.isEmpty()) {
+                            transition(SchedulerState.DISPATCHING);
+                        } else if (droneData.values().stream().allMatch(DroneData::isAvailable)) {
+                            transition(SchedulerState.WAITING);
+                        }
+                        break;
+
+                    case FAULT_HANDLING:
+                        handleFault();
+                        transition(SchedulerState.DISPATCHING);
+                        break;
+
+                }
                 dispatch();
             }
         } catch (Exception e) {
@@ -223,9 +259,9 @@ public class Scheduler implements Runnable {
         return true;
     }
 
-    private void dispatch() {
+    private boolean dispatch() {
         if (fireQueue.isEmpty()) {
-            return;
+            return false;
         }
 
         DroneData candidate = null;
@@ -238,7 +274,7 @@ public class Scheduler implements Runnable {
         }
 
         if (candidate == null) {
-            return;
+            return false;
         }
 
         FireEvent event = fireQueue.poll();
@@ -270,6 +306,35 @@ public class Scheduler implements Runnable {
 
         } catch (Exception e) {
             System.out.println("[ERROR] Scheduler - dispatch: " + e.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    private void transition(SchedulerState next) {
+        System.out.println("[SCHEDULER] " + schedulerState + " -> " + next);
+        schedulerState = next;
+    }
+
+    private boolean hasFault() {
+        return droneData.values().stream().anyMatch(d -> d.getState() == DroneState.FAULTED);
+    }
+
+    private void handleFault() {
+        for (DroneData drone : droneData.values()) {
+            if (drone.getState() == DroneState.FAULTED) {
+                System.out.println("[SCHEDULER] Handling fault for drone " + drone.getDroneId());
+
+                if (drone.getCurrentMission() != null) {
+                    fireQueue.add(drone.getCurrentMission());
+                    System.out.println("[SCHEDULER] Re-queued mission: " + drone.getCurrentMission());
+                }
+
+                //removes drone from the fleet so it won't be dispatched again
+                droneData.remove(drone.getDroneId());
+                droneAddresses.remove(drone.getDroneId());
+                System.out.println("[SCHEDULER] Drone " + drone.getDroneId() + " removed from fleet.");
+            }
         }
     }
 }

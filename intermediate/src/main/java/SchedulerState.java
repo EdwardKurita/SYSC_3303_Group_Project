@@ -1,0 +1,3 @@
+public enum SchedulerState {
+    WAITING, DISPATCHING, MONITORING, FAULT_HANDLING
+}
