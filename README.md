@@ -196,6 +196,107 @@ root/
 #### Scheduler State Machine Diagram
 ![Scheduler_State_Machine_Diagram](UMLs/scheduler_state_machine.drawio.png)
 
+
+## Iteration 3
+
+**Group 12:** Jiayi Han, Declan Koster, Shael Kotecha, Edward Kurita
+
+**Team Responsibilities:**
+- **Shael Kotecha:** Diagrams - UML class, sequence, state machine, and Scheduler State Machine Diagramdiagrams for Iteration 3
+- **Declan Koster:** Testing - JUnit 5 tests for all classes and integration tests
+- **Jiayi Han:** Documentation & Implementation - README, project documentation, and implementation support
+- **Edward Kurita:** Implementation - Core system implementation, UDP communication, state machines
+
+---
+### Overview
+
+Iteration 3 transforms our firefighting drone system from a single JVM application into a fully distributed system with three independent processes communicating via UDP sockets. This architecture enables multiple drones to run as separate processes, with real-time position tracking, dynamic mission rerouting, and fault handling.
+
+---
+
+### What's New in Iteration 3
+
+- Communication - UDP DatagramSockets over network
+- Processes - Three separate programs (Fire, Scheduler, Drone clients)
+- Drones - Multiple drones (each as separate process)
+- Architecture - Fully distributed
+- Position Tracking	- Real-time coordinates (posX, posY) with animation
+- Scheduler Logic - Formal state machine with 4 states
+- Drone States - 8 states including PARTIAL and FAULTED
+- Rerouting - Dynamic rerouting based on drone position
+- Fault Handling - FAULTED state and automatic drone removal
+- GUI Updates - Network UDP updates to separate GUI process
+  
+---
+
+### File Structure
+```
+SYSC3303_Group_Project/
+│
+├── 📂 clients/                          # NEW - DRONE CLIENTS (separate process)
+│   ├── DroneSubsystem.java              # Drone logic with UDP receive
+│   ├── FireEvent.java                    # Fire event data model
+│   ├── DroneState.java                   # Drone state enum
+│   └── Main.java                          # Drone client entry point
+│
+├── 📂 intermediate/                      # UPDATED - SCHEDULER (separate process)
+│   ├── Scheduler.java                     # Main scheduler with UDP & state machine
+│   ├── SchedulerState.java                 # NEW - Scheduler state enum
+│   ├── DroneData.java                      # Updated with position tracking
+│   ├── FireEvent.java                       # Fire event data
+│   ├── DroneState.java                       # Drone state enum
+│   └── Main.java                              # Scheduler entry point
+│
+├── 📂 server/                             # UPDATED - FIRE INCIDENT SUBSYSTEM
+│   ├── FireIncidentSubsystem.java          # Updated with UDP send
+│   ├── FireDroneGUI.java                    # GUI with live updates
+│   ├── GuiUpdateReceiver.java                # NEW - UDP listener for GUI
+│   ├── FireIncidentZone.java                  # Zone management
+│   ├── FireEvent.java                           # Fire event data
+│   ├── Zone.java                                # Zone coordinates
+│   └── Main.java                                  # Fire server entry point
+│
+├── 📂 data/                                # UNCHANGED - CONFIGURATION FILES
+│   ├── events.csv                           # Fire event schedule
+│   └── zones.csv                             # Zone coordinates
+│
+├── 📂 test/                                 # UPDATED - TEST FILES
+│   ├── clients/
+│   │   ├── DroneSubsystemTest.java           # Drone unit tests
+│   │   ├── FireEventTest.java                 # Event tests
+│   │   └── Iter3DroneSubsystemTest.java       # NEW - Integration tests
+│   ├── intermediate/
+│   │   ├── DroneDataTest.java                 # DroneData tests
+│   │   ├── FireEventTest.java                  # Event tests
+│   │   ├── Iter3SchedulerTest.java              # NEW - Scheduler integration tests
+│   │   └── SchedulerTest.java                    # Scheduler unit tests
+│   └── server/
+│       ├── FireDroneGUITest.java                # GUI tests
+│       ├── FireEventTest.java                    # Event tests
+│       ├── FireIncidentSubsystemTest.java         # Fire subsystem tests
+│       └── Iter3FireIncidentSubsystemTest.java     # NEW - Fire integration tests
+│
+└── 📂 uml/                                 # NEW - UML DIAGRAMS
+    ├── UML_Class_Iter3.png
+    ├── Sequence_Diagram_Iter3.png
+    ├── Drone_State_Machine_Diagram.png
+    └── Scheduler_State_Machine_Diagram.png
+```
+
+---
+
+### Setup and Run
+
+1) Clone the Repository
+2) Open in IntelliJ
+3) Terminal 1 - Start Fire Server (GUI)
+4) Terminal 2 - Start Scheduler
+5) Terminal 3 - Start Drone 1
+6) Terminal 4 - Start Drone 2
+7) Shutdown - Press Ctrl+C in each terminal window
+
+---
+
 ### Iteration 3 UML
 ### Class Diagram
 ![UML_Class iter_3](UMLs/UMLCLassIter3.drawio.png)
