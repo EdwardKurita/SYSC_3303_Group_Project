@@ -195,3 +195,17 @@ root/
 
 #### Scheduler State Machine Diagram
 ![Scheduler_State_Machine_Diagram](UMLs/scheduler_state_machine.drawio.png)
+
+### Iteration 3 UML
+### Class Diagram
+![UML_Class iter_3](UMLs/UMLCLassIter3.drawio.png)
+
+### Sequence Diagram
+![Sequence_Diagram_Iter_3](UMLs/SequenceDiagramIter3.png)
+
+### State Machine Diagrams
+#### Drone State Machine Diagram
+![Drone_State_Machine_Diagram](UMLs/DroneStateiter3.drawio.png)
+
+#### Scheduler State Machine Diagram
+![Scheduler_State_Machine_Diagram](UMLs/StateMachineIter3.drawio.png)
