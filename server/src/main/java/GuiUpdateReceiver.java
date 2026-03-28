@@ -23,19 +23,19 @@ public class GuiUpdateReceiver implements Runnable {
                 int len = packet.getLength();
 
                 if (data[0] == TYPE_GUI_UPDATE) {
-                    // fields: [droneId, status, posX, posY, waterRemaining, zoneId, severity]
+                    // fields: [droneId, status, posX, posY, waterRemaining, zoneId, severity, faultType]
                     String[] parsed = new String(data, 1, len - 1).split(",");
 
-                    int droneId = Integer.parseInt(parsed[0]);
-                    String status = parsed[1];
-                    double posX = Double.parseDouble(parsed[2]);
-                    double posY = Double.parseDouble(parsed[3]);
+                    int droneId           = Integer.parseInt(parsed[0]);
+                    String status         = parsed[1];
+                    double posX           = Double.parseDouble(parsed[2]);
+                    double posY           = Double.parseDouble(parsed[3]);
                     double waterRemaining = Double.parseDouble(parsed[4]);
-                    int zoneId = Integer.parseInt(parsed[5]);
-                    String severity = (parsed.length > 6) ? parsed[6] : "NONE";
+                    int zoneId            = Integer.parseInt(parsed[5]);
+                    String severity       = (parsed.length > 6) ? parsed[6] : "NONE";
+                    String faultType      = (parsed.length > 7) ? parsed[7] : "NONE"; // NEW
 
-                    gui.updateDroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity);
-
+                    gui.updateDroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity, faultType);
                 } else if (data[0] == TYPE_SHUTDOWN) {
                     gui.log("[GUI] Shutdown received.");
                     running = false;

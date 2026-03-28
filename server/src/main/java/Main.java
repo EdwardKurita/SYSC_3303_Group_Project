@@ -11,8 +11,12 @@ public class Main {
         InetAddress schedulerAddress = InetAddress.getLocalHost();
 
         String base = System.getProperty("user.dir");
-        String eventsPath = base + File.separator + "data" + File.separator + "events.csv";
-        String zonesPath = base + File.separator + "data" + File.separator + "zones.csv";
+        //String eventsPath = base + File.separator + "data" + File.separator + "events.csv";
+        //String zonesPath = base + File.separator + "data" + File.separator + "zones.csv";
+
+        String eventsPath = base + File.separator + "server" + File.separator + "data" + File.separator + "events.csv";
+        String zonesPath = base + File.separator + "server" + File.separator + "data" + File.separator + "zones.csv";
+
 
         if (!new File(eventsPath).exists() || !new File(zonesPath).exists()) {
             System.err.println("ERROR: data/events.csv or data/zones.csv not found.");

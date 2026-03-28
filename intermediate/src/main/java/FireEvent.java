@@ -4,14 +4,16 @@ public class FireEvent {
     private int zoneId;
     private String eventType; // "FIRE_DETECTED" or "DRONE_REQUEST"
     private String severity; // "High" or "Moderate" or "Low"
-
+    private String faultType;
     // Constructor
-    public FireEvent (String time, int zoneId, String eventType, String severity) {
+    public FireEvent (String time, int zoneId, String eventType, String severity, String faultType) {
         // Store the time, zoneId, event type and severity
         this.time = time;
         this.zoneId = zoneId;
         this.eventType = eventType;
         this.severity = severity;
+        this.faultType = faultType != null ? faultType : "NONE";
+
     }
 
     // Getter method
@@ -19,6 +21,7 @@ public class FireEvent {
     public int getZoneId() {return zoneId;}
     public String getEventType() {return eventType;}
     public String getSeverity() {return severity;}
+    public String getFaultType() { return faultType; }
 
     // Coverts HH:MM:SS time to total seconds for calculations
     public int getTimeInSeconds() {
@@ -43,6 +46,6 @@ public class FireEvent {
     @Override
     public String toString() {
         // Example output: "[14:03:15] Zone 3: FIRE_DETECTED (High)"
-        return String.format ("[%s] Zone %d: %s (%s)", time, zoneId, eventType, severity);
+        return String.format ("[%s] Zone %d: %s (%s) [fault=%s]", time, zoneId, eventType, severity, faultType);
     }
 }

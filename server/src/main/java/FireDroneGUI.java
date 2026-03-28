@@ -5,12 +5,11 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FireDroneGUI extends JFrame {
-    private JTextArea  logArea;
-    private JTextArea  eventListArea;
+    private JTextArea  logArea;          // Top-left: system log
+    private JTextArea  faultLogArea;     // Top-right: fault log (replaces fire events sent)
     private JLabel     serverStatusLabel;
     private JLabel     activeFireLabel;
-    private DefaultListModel<String> zonesModel;
-    private ZoneMapPanel mapPanel;
+    private ZoneMapPanel mapPanel;       // Bottom: map full width
 
     private final Queue<String> logQueue = new LinkedList<>();
     private final Object logLock = new Object();
@@ -45,9 +44,10 @@ public class FireDroneGUI extends JFrame {
         statusPanel.add(activeFireLabel);
         add(statusPanel, BorderLayout.NORTH);
 
-        // Center: log + fire events
+        // Center: system log (left) + fault log (right)
         JPanel centerPanel = new JPanel(new GridLayout(1, 2));
 
+        // Left: System Log
         JPanel logPanel = new JPanel(new BorderLayout());
         logPanel.setBorder(BorderFactory.createTitledBorder("System Log"));
         logArea = new JTextArea();
@@ -55,44 +55,38 @@ public class FireDroneGUI extends JFrame {
         logArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
         logPanel.add(new JScrollPane(logArea), BorderLayout.CENTER);
 
-        JPanel eventPanel = new JPanel(new BorderLayout());
-        eventPanel.setBorder(BorderFactory.createTitledBorder("Fire Events Sent"));
-        eventListArea = new JTextArea();
-        eventListArea.setEditable(false);
-        eventListArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
-        eventPanel.add(new JScrollPane(eventListArea), BorderLayout.CENTER);
+        // Right: Fault Log
+        JPanel faultPanel = new JPanel(new BorderLayout());
+        faultPanel.setBorder(BorderFactory.createTitledBorder("Fault Log"));
+        faultLogArea = new JTextArea();
+        faultLogArea.setEditable(false);
+        faultLogArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
+        faultPanel.add(new JScrollPane(faultLogArea), BorderLayout.CENTER);
 
         centerPanel.add(logPanel);
-        centerPanel.add(eventPanel);
+        centerPanel.add(faultPanel);
         add(centerPanel, BorderLayout.CENTER);
 
-        // South: zone list + map
-        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+        // South: map full width (removed zone list panel)
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 1));
         bottomPanel.setPreferredSize(new Dimension(1200, 360));
 
-        JPanel zonesPanel = new JPanel(new BorderLayout());
-        zonesPanel.setBorder(BorderFactory.createTitledBorder("Zones"));
-        zonesModel = new DefaultListModel<>();
-        zonesPanel.add(new JScrollPane(new JList<>(zonesModel)), BorderLayout.CENTER);
-
         mapPanel = new ZoneMapPanel();
-        mapPanel.setBorder(BorderFactory.createTitledBorder(
-                "Zone Map"));
-
-        bottomPanel.add(zonesPanel);
+        mapPanel.setBorder(BorderFactory.createTitledBorder("Zone Map"));
         bottomPanel.add(mapPanel);
+
         add(bottomPanel, BorderLayout.SOUTH);
     }
 
     private void loadZones(List<FireIncidentZone> zones) {
-        for (FireIncidentZone z : zones) zonesModel.addElement(z.toString());
+        // only set zones on map panel, no list needed
         mapPanel.setZones(zones);
     }
 
     private void startLogProcessor() {
         Thread t = new Thread(() -> {
             while (true) {
-                String msg = null;
+                String msg;
                 synchronized (logLock) {
                     while (logQueue.isEmpty()) {
                         try { logLock.wait(); } catch (InterruptedException e) { return; }
@@ -110,6 +104,7 @@ public class FireDroneGUI extends JFrame {
         t.start();
     }
 
+    // ===== LOGGING =====
     public void log(String message) {
         synchronized (logLock) {
             logQueue.offer(message);
@@ -119,14 +114,11 @@ public class FireDroneGUI extends JFrame {
 
     public void logError(String message) { log("[ERROR] " + message); }
 
-    public void updateEventList(String event) {
-        SwingUtilities.invokeLater(() -> eventListArea.append(event + "\n"));
-    }
-
     public void updateServerStatus(String status) {
         SwingUtilities.invokeLater(() -> serverStatusLabel.setText("Server: " + status));
     }
 
+    // ===== ACTIVE FIRE COUNT =====
     public void incrementActiveFires() {
         SwingUtilities.invokeLater(() -> {
             activeFireCount++;
@@ -141,18 +133,24 @@ public class FireDroneGUI extends JFrame {
         });
     }
 
-    public int getActiveFireCount() {
-        return activeFireCount;
-    }
+    public int getActiveFireCount() { return activeFireCount; }
 
-    public void updateDroneMarker(int droneId, String status, double posX, double posY, double waterRemaining, int zoneId, String severity) {
-        droneMarkers.put(droneId, new DroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity));
+    // ===== DRONE UPDATES =====
+    public void updateDroneMarker(int droneId, String status, double posX, double posY,
+                                  double waterRemaining, int zoneId, String severity,
+                                  String faultType) {
+
+        droneMarkers.put(droneId, new DroneMarker(droneId, status, posX, posY,
+                waterRemaining, zoneId, severity, faultType));
 
         // Track active fire severity per zone
         if (zoneId > 0) {
-            if ("NONE".equals(severity)) {
+            if ("COMPLETED".equals(status)) {
+                // only clear zone colour on COMPLETED
                 activeFireSeverity.remove(zoneId);
-            } else {
+            } else if (!"RETURNING".equals(status)
+                    && !"RETURNED".equals(status)
+                    && !"NONE".equals(severity)) {
                 activeFireSeverity.put(zoneId, severity);
             }
         }
@@ -160,26 +158,44 @@ public class FireDroneGUI extends JFrame {
         SwingUtilities.invokeLater(() -> {
             mapPanel.setDroneMarkers(droneMarkers);
             mapPanel.setActiveFireSeverity(activeFireSeverity);
-            log(String.format("[GUI] Drone %d : %s  pos=(%.0f,%.0f)  water=%.1fL  zone=%d  sev=%s",
-                    droneId, status, posX, posY, waterRemaining, zoneId, severity));
+
+            log(String.format("[GUI] Drone %d : %s pos=(%.0f,%.0f) water=%.1fL zone=%d sev=%s fault=%s",
+                    droneId, status, posX, posY, waterRemaining, zoneId, severity, faultType));
+
+            // log faults to fault log panel
+            if (!"NONE".equals(faultType)) {
+                String timestamp = new java.text.SimpleDateFormat("HH:mm:ss")
+                        .format(new java.util.Date());
+                faultLogArea.append(String.format("[%s] Drone %d — %s (%s)\n",
+                        timestamp, droneId, faultType, status));
+                faultLogArea.setCaretPosition(faultLogArea.getDocument().getLength());
+            }
+
             if ("COMPLETED".equals(status)) decrementActiveFires();
         });
     }
 
+    // ===== DRONE MARKER CLASS =====
     public static class DroneMarker {
         public final int droneId;
-        public final String status, severity;
+        public final String status, severity, faultType;
         public final double posX, posY, waterRemaining;
         public final int zoneId;
 
-        DroneMarker(int droneId, String status, double posX, double posY, double waterRemaining, int zoneId, String severity) {
-            this.droneId = droneId; this.status = status;
-            this.posX = posX; this.posY = posY;
+        DroneMarker(int droneId, String status, double posX, double posY,
+                    double waterRemaining, int zoneId, String severity, String faultType) {
+            this.droneId        = droneId;
+            this.status         = status;
+            this.posX           = posX;
+            this.posY           = posY;
             this.waterRemaining = waterRemaining;
-            this.zoneId = zoneId; this.severity = severity;
+            this.zoneId         = zoneId;
+            this.severity       = severity;
+            this.faultType      = faultType;
         }
     }
 
+    // ===== ZONE MAP PANEL =====
     class ZoneMapPanel extends JPanel {
         private List<FireIncidentZone> zones = new ArrayList<>();
         private Map<Integer, DroneMarker> markers = new HashMap<>();
@@ -187,9 +203,9 @@ public class FireDroneGUI extends JFrame {
         private static final int PAD   = 30;
         private static final int WORLD = 2000;
 
-        void setZones(List<FireIncidentZone> z)                { this.zones = z; repaint(); }
-        void setDroneMarkers(Map<Integer, DroneMarker> m)      { this.markers = new HashMap<>(m); repaint(); }
-        void setActiveFireSeverity(Map<Integer, String> s)     { this.fireSeverity = new HashMap<>(s); repaint(); }
+        void setZones(List<FireIncidentZone> z)                { zones = z; repaint(); }
+        void setDroneMarkers(Map<Integer, DroneMarker> m)      { markers = new HashMap<>(m); repaint(); }
+        void setActiveFireSeverity(Map<Integer, String> s)     { fireSeverity = new HashMap<>(s); repaint(); }
 
         @Override
         protected void paintComponent(Graphics g) {
@@ -200,24 +216,23 @@ public class FireDroneGUI extends JFrame {
             int w = getWidth()  - 2 * PAD;
             int h = getHeight() - 2 * PAD;
 
-            // Grid
+            // Draw grid
             g2.setColor(new Color(180, 180, 180));
             for (int i = 0; i <= 8; i++) {
                 g2.drawLine(PAD + i * w / 8, PAD, PAD + i * w / 8, PAD + h);
                 g2.drawLine(PAD, PAD + i * h / 8, PAD + w, PAD + i * h / 8);
             }
 
-            // Zones — fill colour depends on active fire severity
+            // Draw zones — fill colour depends on active fire severity
             for (FireIncidentZone z : zones) {
                 int px1 = PAD + z.getX1() * w / WORLD, py1 = PAD + z.getY1() * h / WORLD;
                 int px2 = PAD + z.getX2() * w / WORLD, py2 = PAD + z.getY2() * h / WORLD;
                 int rx = Math.min(px1, px2), ry = Math.min(py1, py2);
-                int rw = Math.abs(px2 - px1), rh = Math.abs(py2 - py1);
+                int rw = Math.abs(px2 - px1),  rh = Math.abs(py2 - py1);
 
                 // Fill by severity
                 String sev = fireSeverity.get(z.getZoneId());
-                Color fill = severityFill(sev);
-                g2.setColor(fill);
+                g2.setColor(severityFill(sev));
                 g2.fillRect(rx, ry, rw, rh);
 
                 // Border
@@ -225,29 +240,35 @@ public class FireDroneGUI extends JFrame {
                 g2.setStroke(new BasicStroke(sev != null ? 2.5f : 1.5f));
                 g2.drawRect(rx, ry, rw, rh);
 
-                // Zone ID
+                // Zone ID label
                 g2.setColor(Color.BLACK);
                 g2.setFont(new Font("Arial", Font.BOLD, 11));
                 g2.drawString("Z" + z.getZoneId(), rx + 4, ry + 14);
-
             }
 
-            // Drone markers (triangles)
+            // Draw drones — colour by fault type
             for (DroneMarker m : markers.values()) {
                 int dx = PAD + (int)(m.posX * w / WORLD);
                 int dy = PAD + (int)(m.posY * h / WORLD);
 
-                // Triangle
+                // Fill triangle with fault colour
+                g2.setColor(droneColor(m.faultType));
                 int[] xs = { dx, dx - 8, dx + 8 };
                 int[] ys = { dy - 10, dy + 7, dy + 7 };
                 g2.fillPolygon(xs, ys, 3);
+
+                // Black outline
                 g2.setColor(Color.BLACK);
                 g2.setStroke(new BasicStroke(1));
                 g2.drawPolygon(xs, ys, 3);
+
+                // Drone ID label
+                g2.setFont(new Font("Arial", Font.BOLD, 10));
+                g2.drawString("D" + m.droneId, dx + 10, dy);
             }
         }
 
-        // live update the colour of the zone based on the fire (or none)
+        // Zone fill colour based on fire severity
         private Color severityFill(String severity) {
             if (severity == null) return new Color(173, 216, 230);
             return switch (severity.toUpperCase()) {
@@ -255,6 +276,18 @@ public class FireDroneGUI extends JFrame {
                 case "MODERATE" -> new Color(255, 180,  60);
                 case "LOW"      -> new Color(255, 255, 180);
                 default         -> new Color(173, 216, 230);
+            };
+        }
+
+        // Drone colour based on fault type
+        private Color droneColor(String faultType) {
+            if (faultType == null || "NONE".equals(faultType))
+                return new Color(30, 144, 255);     // normal — blue
+            return switch (faultType.toUpperCase()) {
+                case "DRONE_STUCK"   -> new Color(255, 180, 0);   // amber
+                case "NOZZLE_JAMMED" -> new Color(220, 50, 50);   // red
+                case "PACKET_LOSS"   -> new Color(255, 120, 0);   // orange
+                default              -> new Color(128, 0, 128);   // purple fallback
             };
         }
     }
@@ -265,5 +298,4 @@ public class FireDroneGUI extends JFrame {
             mapPanel.setActiveFireSeverity(activeFireSeverity);
         });
     }
-
 }

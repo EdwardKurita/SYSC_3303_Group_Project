@@ -156,33 +156,38 @@ public class FireIncidentSubsystem implements Runnable {
     }
 
     private void sendFireEvents() {
-        try (DatagramSocket schedulerSocket = new DatagramSocket(); BufferedReader br = new BufferedReader(new FileReader(eventFilePath))) {
-            br.readLine(); // get the headerr
+        try (DatagramSocket schedulerSocket = new DatagramSocket();
+             BufferedReader br = new BufferedReader(new FileReader(eventFilePath))) {
+
+            br.readLine(); // skip header
             String line;
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
 
-                String time = parts[0].trim();
-                int zoneId = Integer.parseInt(parts[1].trim());
+                String time      = parts[0].trim();
+                int zoneId       = Integer.parseInt(parts[1].trim());
                 String eventType = parts[2].trim();
-                String severity = parts[3].trim();
+                String severity  = parts[3].trim();
+                String faultType = (parts.length > 4) ? parts[4].trim() : "NONE"; // NEW
 
-                FireEvent event = new FireEvent(time, zoneId, eventType, severity);
+                FireEvent event = new FireEvent(time, zoneId, eventType, severity, faultType); // NEW
                 gui.log("[FIRE] Detected: " + event);
-                gui.updateEventList(event.toString());
                 gui.incrementActiveFires();
                 gui.updateZoneFire(zoneId, severity);
 
-                byte[] payload = (time +  "," + zoneId + "," + eventType + "," + severity).getBytes();
+                // faultType added as 5th field in packet
+                byte[] payload = (time + "," + zoneId + "," + eventType + ","
+                        + severity + "," + faultType).getBytes();
                 byte[] data = new byte[payload.length + 1];
                 data[0] = TYPE_FIRE_EVENT;
                 System.arraycopy(payload, 0, data, 1, payload.length);
 
-                schedulerSocket.send(new DatagramPacket(data, data.length, intermediate, PORT_SCHEDULER_FIRE));
-                gui.log("[FIRE] Sent Fire Event Data: " + new String(data));
+                schedulerSocket.send(new DatagramPacket(data, data.length,
+                        intermediate, PORT_SCHEDULER_FIRE));
+                gui.log("[FIRE] Sent: " + event);
             }
         } catch (Exception e) {
-            System.out.println("[ERROR] FireIncidentSubsystem - sendFireEvents" + e.getMessage());
+            System.out.println("[ERROR] FireIncidentSubsystem - sendFireEvents: " + e.getMessage());
         }
     }
 

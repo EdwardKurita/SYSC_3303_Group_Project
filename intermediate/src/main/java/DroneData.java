@@ -1,3 +1,5 @@
+import main.java.DroneState;
+
 public class DroneData{
     private final int droneId;
     private DroneState state;
@@ -5,6 +7,8 @@ public class DroneData{
     private int currentZone;
     private FireEvent currentMission;
     private double posX, posY;
+    private String faultType = "NONE";
+    private long lastSeenMs  = System.currentTimeMillis();
 
     private static final double TANK_CAPACITY = 15.0;
 
@@ -37,6 +41,20 @@ public class DroneData{
     public double getPosX() {return posX;}
     public double getPosY() {return posY;}
 
+    public String getFaultType() { return faultType; }
+    public void setFaultType(String faultType) {
+        this.faultType = faultType != null ? faultType : "NONE";
+    }
+    public long getLastSeenMs() { return lastSeenMs; }
+    public void updateLastSeen() {
+        this.lastSeenMs = System.currentTimeMillis();
+    }
+    public boolean isHardFault() {
+        return "NOZZLE_JAMMED".equals(faultType);
+    }
+    public boolean isSoftFault() {
+        return "DRONE_STUCK".equals(faultType) || "PACKET_LOSS".equals(faultType);
+    }
 
     //HELPER FUNCTIONS
 
@@ -68,6 +86,7 @@ public class DroneData{
         this.state = DroneState.IDLE;
         this.currentZone = 0;
         this.currentMission = null;
+        this.faultType = "NONE"; // clear any fault so drone re-enters fleet cleanly
         refill();
     }
 
@@ -78,6 +97,11 @@ public class DroneData{
     public void updateFromResponse(String[] fields) {
         posX =  Double.parseDouble(fields[6]);
         posY =  Double.parseDouble(fields[7]);
+
+        if (fields.length > 8) {
+            setFaultType(fields[8]);
+        }
+        updateLastSeen();
 
         switch (fields[2]) {
             case "EN_ROUTE":
@@ -111,6 +135,12 @@ public class DroneData{
                 returnToBase();
                 break;
 
+            case "FAULTED":
+            case "DRONE_STUCK":
+            case "NOZZLE_JAMMED":
+                this.state = DroneState.FAULTED;
+                break;
+
             case "ERROR":
                 System.out.println("ERROR HAS OCCURRED WITH droneData");
                 break;
@@ -120,7 +150,7 @@ public class DroneData{
 
     @Override
     public String toString() {
-        return String.format("Drone %d: %s, WaterAmount: %.1fL, Zone: %d", droneId, state, currentWater, currentZone);
+        return String.format("Drone %d: %s, WaterAmount: %.1fL, Zone: %d, Fault: %s", droneId, state, currentWater, currentZone, faultType);
     }
 
 }
