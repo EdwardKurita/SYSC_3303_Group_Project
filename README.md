@@ -310,12 +310,3 @@ SYSC3303_Group_Project/
 
 #### Scheduler State Machine Diagram
 ![Scheduler_State_Machine_Diagram](UMLs/StateMachineIter3.drawio.png)
-
-#### Normal Operation Timing Diagram
-![Normal Operation Timing Diagram](https://github.com/user-attachments/assets/b600b754-dc02-4fc4-ba21-54f685350116)
-
-#### Fault Handling Timing Diagram
-![Fault Handling Timing Diagram](https://github.com/user-attachments/assets/8b5476b4-1dca-4c53-a3b5-1d119777b781)
-
-#### Partial Completion Timing Diagram
-![Partial Completion Timing Diagram](https://github.com/user-attachments/assets/58c04b20-1b90-406f-88b1-d2018701a55c)
