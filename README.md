@@ -310,3 +310,108 @@ SYSC3303_Group_Project/
 
 #### Scheduler State Machine Diagram
 ![Scheduler_State_Machine_Diagram](UMLs/StateMachineIter3.drawio.png)
+
+---
+
+## Iteration 4
+
+**Group 12:** Jiayi Han, Declan Koster, Shael Kotecha, Edward Kurita
+
+**Team Responsibilities:**
+- **Shael Kotecha:** Implementation - Core system implementation, UDP communication, state machines
+- **Declan Koster:** Documentation & Implementation - README, project documentation, and implementation support
+- **Jiayi Han:** Diagrams - Fault Handling, Normal Operation, Partial Completion timing Diagrams  
+- **Edward Kurita:** Testing - JUnit 5 tests for all classes and integration tests
+
+---
+### Overview
+
+Iteration 4 Added 2 different types of fault handling - Soft and Hard - which either stops the drone process and returns it to base (soft) or completely shuts down the drone and turns it off (hard)
+
+---
+
+### What's New in Iteration 3
+
+- State Machine - Now handles Faults 
+- GUI Update - fixed error with the wrong colour Fire Intensity 
+---
+
+### File Structure
+```
+SYSC3303_Group_Project/
+│
+├── 📂 clients/                          # DRONE CLIENTS (separate process)
+│   ├── DroneSubsystem.java              # UPDATED - Drone logic with UDP receive
+│   ├── FireEvent.java                    # Fire event data model
+│   ├── DroneState.java                   # Drone state enum
+│   └── Main.java                          # Drone client entry point
+│
+├── 📂 intermediate/                      # UPDATED - SCHEDULER (separate process)
+│   ├── Scheduler.java                     # Main scheduler with UDP & state machine
+│   ├── SchedulerState.java                 # Scheduler state enum
+│   ├── DroneData.java                      # Updated with position tracking
+│   ├── FireEvent.java                       # Fire event data
+│   ├── DroneState.java                       # Drone state enum
+│   └── Main.java                              # Scheduler entry point
+│
+├── 📂 server/                             # UPDATED - FIRE INCIDENT SUBSYSTEM
+│   ├── FireIncidentSubsystem.java          # Updated with UDP send
+│   ├── FireDroneGUI.java                    # GUI with live updates
+│   ├── GuiUpdateReceiver.java                # NEW - UDP listener for GUI
+│   ├── FireIncidentZone.java                  # Zone management
+│   ├── FireEvent.java                           # Fire event data
+│   ├── Zone.java                                # Zone coordinates
+│   └── Main.java                                  # Fire server entry point
+│
+├── 📂 data/                                # UPDATED - CONFIGURATION FILES
+│   ├── events.csv                           # Fire event schedule
+│   └── zones.csv                             # Zone coordinates
+│
+├── 📂 test/                                 # UPDATED - TEST FILES
+│   ├── clients/
+│   │   ├── DroneSubsystemTest.java           # Drone unit tests
+│   │   ├── FireEventTest.java                 # Event tests
+│   │   ├── Iter3DroneSubsystemTest.java       # Integration tests
+│   │   └── Iter4Test.java                     # NEW - Fault Test
+│   ├── intermediate/
+│   │   ├── DroneDataTest.java                 # DroneData tests
+│   │   ├── FireEventTest.java                  # Event tests
+│   │   ├── Iter3SchedulerTest.java              # Scheduler integration tests
+│   │   ├── SchedulerTest.java                    # Scheduler unit tests
+│   │   └── Iter4Test.java                        # NEW - Fault Test
+│   └── server/
+│       ├── FireDroneGUITest.java                # GUI tests
+│       ├── FireEventTest.java                    # Event tests
+│       ├── FireIncidentSubsystemTest.java         # Fire subsystem tests
+│       ├── Iter3FireIncidentSubsystemTest.java     #  Fire integration tests
+│       └── Iter4Test.java                          # NEW - Fault Test
+│
+└── 📂 uml/                                 # NEW - UML DIAGRAMS
+    ├── Fault Handling Timing Diagram.JPG
+    ├── Normal Operation Timing Diagram.JPG
+    └── Partial Completion Timing Diagram.JPG
+```
+
+---
+
+### Setup and Run
+
+1) Clone the Repository
+2) Open in IntelliJ
+3) Terminal 1 - Start Fire Server (GUI)
+4) Terminal 2 - Start Scheduler
+5) Terminal 3 - Start Drone 1
+6) Terminal 4 - Start Drone 2
+7) Shutdown - Press Ctrl+C in each terminal window
+
+---
+
+### Iteration 4 Timing Diagrams
+### Fault Handing 
+![Fault Handling Timing Diagram](UMLs/Fault%20Handling%20Timing%20Diagram.JPG)
+
+### Normal Operation
+![Normal Operation Timing Diagram](UMLs/Normal%20Operation%20Timing%20Diagram.JPG)
+
+### Partial Completion
+![Partial Completion Timing Diagram](UMLs/Partial%20Completion%20Timing%20Diagram.JPG)
