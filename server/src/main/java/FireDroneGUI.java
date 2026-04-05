@@ -19,6 +19,10 @@ public class FireDroneGUI extends JFrame {
 
     private int activeFireCount = 0;
 
+    private JTextArea metricsArea;           // Panel to show live metrics
+    private JPanel metricsPanel;              // Container for metrics
+    private int completedFires = 0;           // Counter for completed fires
+
     public FireDroneGUI(List<FireIncidentZone> zones) {
         setTitle("Firefighting Drone System – Fire Incident Server");
         setSize(1200, 950);
@@ -32,20 +36,29 @@ public class FireDroneGUI extends JFrame {
 
     private void setupGUI() {
         // North: status bar
-        JPanel statusPanel = new JPanel(new GridLayout(1, 3));
+        JPanel statusPanel = new JPanel(new GridLayout(1, 4));// Changed from 3 to 4 columns
         JLabel titleLabel = new JLabel("Fire Incident Subsystem (Server)", JLabel.CENTER);
         titleLabel.setFont(new Font("Arial", Font.BOLD, 14));
         serverStatusLabel = new JLabel("Server: STARTING", JLabel.CENTER);
         serverStatusLabel.setFont(new Font("Arial", Font.BOLD, 14));
         activeFireLabel = new JLabel("Active Fires: 0", JLabel.CENTER);
         activeFireLabel.setFont(new Font("Arial", Font.BOLD, 14));
+
+        // Add completed fires label
+        JLabel completedLabel = new JLabel("Completed: 0", JLabel.CENTER);
+        completedLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        completedLabel.setName("completedLabel");  // So we can update it later
+
         statusPanel.add(titleLabel);
         statusPanel.add(serverStatusLabel);
         statusPanel.add(activeFireLabel);
+        statusPanel.add(completedLabel);
         add(statusPanel, BorderLayout.NORTH);
 
         // Center: system log (left) + fault log (right)
-        JPanel centerPanel = new JPanel(new GridLayout(1, 2));
+        // iter5: system log (left) + fault log (right) + metrics
+
+        JPanel centerPanel = new JPanel(new GridLayout(1, 3));// Changed from 2 to 3 columns
 
         // Left: System Log
         JPanel logPanel = new JPanel(new BorderLayout());
@@ -63,8 +76,18 @@ public class FireDroneGUI extends JFrame {
         faultLogArea.setFont(new Font("Monospaced", Font.PLAIN, 11));
         faultPanel.add(new JScrollPane(faultLogArea), BorderLayout.CENTER);
 
+        // Metrics Panel on the right
+        JPanel metricsPanelContainer = new JPanel(new BorderLayout());
+        metricsPanelContainer.setBorder(BorderFactory.createTitledBorder("Live Metrics"));
+        metricsArea = new JTextArea(8, 25);
+        metricsArea.setEditable(false);
+        metricsArea.setFont(new Font("Monospaced", Font.PLAIN, 10));
+        metricsArea.setText("Waiting for data...\n");
+        metricsPanelContainer.add(new JScrollPane(metricsArea), BorderLayout.CENTER);
+
         centerPanel.add(logPanel);
         centerPanel.add(faultPanel);
+        centerPanel.add(metricsPanelContainer);
         add(centerPanel, BorderLayout.CENTER);
 
         // South: map full width (removed zone list panel)
@@ -128,9 +151,73 @@ public class FireDroneGUI extends JFrame {
 
     public void decrementActiveFires() {
         SwingUtilities.invokeLater(() -> {
-            if (activeFireCount > 0) activeFireCount--;
+            if (activeFireCount > 0) {
+                activeFireCount--;
+                completedFires++;
+            }
             activeFireLabel.setText("Active Fires: " + activeFireCount);
+
+            // Find the completed label and update its text
+            Component[] components = ((JPanel)getContentPane().getComponent(0)).getComponents();
+            for (Component comp : components) {
+                if (comp instanceof JLabel && "completedLabel".equals(comp.getName())) {
+                    ((JLabel) comp).setText("Completed: " + completedFires);
+                    break;
+                }
+            }
         });
+    }
+
+    /**
+     * Updates the metrics display panel with current system stats
+     * Called periodically by scheduler or when drone status changes
+     */
+    public void updateMetricsDisplay(int activeFires, Map<Integer, Double> droneUtilization) {
+        SwingUtilities.invokeLater(() -> {
+            StringBuilder sb = new StringBuilder();
+            sb.append("=== SYSTEM STATUS ===\n");
+            sb.append("Active Fires: ").append(activeFires).append("\n");
+            sb.append("Completed Fires: ").append(completedFires).append("\n");
+            sb.append("\n=== DRONE UTILIZATION ===\n");
+
+            if (droneUtilization.isEmpty()) {
+                sb.append("No drone data yet\n");
+            } else {
+                for (Map.Entry<Integer, Double> entry : droneUtilization.entrySet()) {
+                    String bar = createProgressBar(entry.getValue());
+                    sb.append(String.format("Drone %d: %5.1f%% %s\n",
+                            entry.getKey(), entry.getValue(), bar));
+                }
+            }
+
+            sb.append("\n=== LEGEND ===\n");
+            sb.append("Blue: Normal drone\n");
+            sb.append("Yellow: Stuck drone\n");
+            sb.append("Red: Nozzle jammed\n");
+            sb.append("Orange: Packet loss\n");
+
+            metricsArea.setText(sb.toString());
+        });
+    }
+
+    /**
+     * Helper method to create a text-based progress bar
+     */
+    private String createProgressBar(double percent) {
+        int barLength = 20;
+        int filled = (int)(percent / 100 * barLength);
+        StringBuilder bar = new StringBuilder("[");
+        for (int i = 0; i < barLength; i++) {
+            if (i < filled) {
+                bar.append("=");
+            } else if (i == filled) {
+                bar.append(">");
+            } else {
+                bar.append(" ");
+            }
+        }
+        bar.append("]");
+        return bar.toString();
     }
 
     public int getActiveFireCount() { return activeFireCount; }
