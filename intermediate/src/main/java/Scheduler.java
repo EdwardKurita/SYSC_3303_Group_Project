@@ -47,6 +47,9 @@ public class Scheduler implements Runnable {
     // timestamp formatter for structured event logging
     private static final SimpleDateFormat TS = new SimpleDateFormat("HH:mm:ss.SSS");
 
+    // Track performance data
+    private PerformanceMetrics metrics = new PerformanceMetrics();
+
     public Scheduler(InetAddress serverAddress) {
         this.serverAddress = serverAddress;
     }
@@ -186,9 +189,13 @@ public class Scheduler implements Runnable {
                         break;
                     case "COMPLETED":
                         log("COMPLETED  drone=" + droneId + " zone=" + parsed[1] + " waterUsed=" + parsed[4] + "L");
+                        // Record when fire is extinguished for metrics
+                        metrics.logFireExtinguished(Integer.parseInt(parsed[1]));
                         break;
                     case "RETURNED":
                         log("RETURNED   drone=" + droneId + " — refilled and ready");
+                        // Record drone return for metrics
+                        metrics.logDroneReturned(droneId);
                         break;
                     case "FAULTED":
                     case "DRONE_STUCK":
@@ -338,6 +345,12 @@ public class Scheduler implements Runnable {
         System.out.println("Severity: " + event.getSeverity());
         System.out.println("===================================================");
 
+        // Log when fire was detected for metrics
+        metrics.logFireDetected(event.getZoneId(), event.getSeverity());
+
+        // Log when drone is dispatched for metrics
+        metrics.logDroneDispatched(candidate.getDroneId(), event.getZoneId());
+
         double[] bounds = zoneBounds.getOrDefault(event.getZoneId(), new double[]{0, 0, 0, 0});
         double cx = (bounds[0] + bounds[2]) / 2.0;
         double cy = (bounds[1] + bounds[3]) / 2.0;
@@ -419,5 +432,10 @@ public class Scheduler implements Runnable {
     /** Timestamped structured log line for key scheduler events. */
     private void log(String msg) {
         System.out.println("[" + TS.format(new Date()) + "] [SCHEDULER] " + msg);
+    }
+
+    // Add shutdown hook
+    public void printFinalMetrics() {
+        metrics.printFinalReport();
     }
 }
