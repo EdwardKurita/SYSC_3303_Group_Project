@@ -11,6 +11,14 @@ public class Main {
         System.out.println("Fire server address : " + fireAddress.getHostAddress());
         System.out.println("Listening on ports  : " + Scheduler.PORT_SCHEDULER_FIRE  + " (FireEventSubsystem), " + Scheduler.PORT_SCHEDULER_DRONE + " (Drones)");
 
-        new Scheduler(fireAddress).run();
+        Scheduler scheduler = new Scheduler(fireAddress);
+
+        //shutdown hook
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            System.out.println("[SHUTDOWN] Printing final metrics:");
+            scheduler.printFinalMetrics();
+        }, "shutdownMetrics"));
+
+        scheduler.run();
     }
 }
