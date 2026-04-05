@@ -5,7 +5,7 @@ import java.util.*;
 
 /**
  * Iteration 5 Test Cases — 10 tests
- * Covers capacity limits, performance metrics, and drone logic
+ * Covers capacity limits, performance metrics, and drone logic.
  *
  * @author Group 12 - Jiayi, Declan, Shael, Edward
  */

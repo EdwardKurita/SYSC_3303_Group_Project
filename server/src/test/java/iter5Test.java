@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.*;
  * Covers fault log, metrics panel, completed fires counter,
  * progress bar, DroneMarker faultType, and updateZoneFire
  *
- * @author Group 12 - Jiayi, Declan, Shael, Edward
+ * @author Group 12 - Jiayi, Declan, Shael, Edward.
  */
 public class iter5Test {
 
