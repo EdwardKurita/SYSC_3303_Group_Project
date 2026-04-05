@@ -205,6 +205,20 @@ public class PerformanceMetrics {
         System.out.println("=".repeat(60));
     }
 
+    public Map<Integer, Double> getUtilization(){
+        Map<Integer, Double> result = new HashMap<>();
+        for (int droneId : droneTotalFlightTime.keySet()) {
+            long flightTime = droneTotalFlightTime.getOrDefault(droneId, 0L);
+            long idleTime = droneTotalIdleTime.getOrDefault(droneId, 0L);
+            long total = flightTime + idleTime;
+            double utilization = (total > 0) ? (double) flightTime/total*100.0 : 0.0;
+            result.put(droneId, utilization);
+        }
+        return result;
+    }
+
+
+
     /**
      * Helper method to format milliseconds into readable time
      */
