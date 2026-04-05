@@ -232,10 +232,15 @@ public class Scheduler implements Runnable {
                             ? drone.getCurrentMission().getSeverity()
                             : "NONE"));
 
+                    //append utilization as field 9 so server can display it in live metrics
+                    double utilization = metrics.getUtilization().getOrDefault(drone.getDroneId(), 0.0);
+
+
                     byte[] payload = (drone.getDroneId() + "," + parsed[2] + ","
                             + drone.getPosX() + "," + drone.getPosY() + ","
                             + drone.getCurrentWater() + "," + drone.getCurrentZone() + ","
-                            + severityInfo + "," + faultType).getBytes(); // NEW: faultType at end
+                            + severityInfo + "," + faultType + "," // NEW: faultType at end
+                            + String.format("%.1f", utilization)).getBytes();
                     byte[] guiData = new byte[payload.length + 1];
                     guiData[0] = TYPE_GUI_UPDATE;
                     System.arraycopy(payload, 0, guiData, 1, payload.length);
@@ -323,6 +328,9 @@ public class Scheduler implements Runnable {
             return false;
         }
 
+        FireEvent event = fireQueue.peek();
+        if (event == null) return false;
+
         DroneData candidate = null;
 
         for (DroneData drone : droneData.values()) {
@@ -332,11 +340,19 @@ public class Scheduler implements Runnable {
             }
         }
 
+        //No drone has enugh water yet -log and wait for refill
         if (candidate == null) {
+            boolean anyIdle = droneData.values().stream().anyMatch(DroneData::isAvailable);
+            if (anyIdle) {
+                log("DISPATCH_WAIT fire=zone:" + event.getZoneId()
+                    + " needs=" + event.getWaterNeeded() + "L"
+                    + " - no drone has sufficient water, waiting for refill");
+            }
             return false;
         }
 
-        FireEvent event = fireQueue.poll();
+        //remove fire from queue not that we have a suitable drone
+        fireQueue.poll();
 
         System.out.println("================================================");
         System.out.println("DISPATCH");
