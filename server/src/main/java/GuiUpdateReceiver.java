@@ -7,6 +7,8 @@ public class GuiUpdateReceiver implements Runnable {
     private final FireDroneGUI gui;
     private volatile boolean running = true;
 
+    private final java.util.Map<Integer, Double> droneUtilization = new java.util.concurrent.ConcurrentHashMap<>();
+
     public GuiUpdateReceiver(FireDroneGUI gui) {
         this.gui = gui;
     }
@@ -35,7 +37,13 @@ public class GuiUpdateReceiver implements Runnable {
                     String severity       = (parsed.length > 6) ? parsed[6] : "NONE";
                     String faultType      = (parsed.length > 7) ? parsed[7] : "NONE"; // NEW
 
+                    //field 9:
+                    if (parsed.length > 8) {
+                        droneUtilization.put(droneId, Double.parseDouble(parsed[8]));
+                    }
+
                     gui.updateDroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity, faultType);
+                    gui.updateMetricsDisplay(gui.getActiveFireCount(), droneUtilization);
                 } else if (data[0] == TYPE_SHUTDOWN) {
                     gui.log("[GUI] Shutdown received.");
                     running = false;
