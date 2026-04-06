@@ -415,3 +415,98 @@ SYSC3303_Group_Project/
 
 ### Partial Completion
 ![Partial Completion Timing Diagram](UMLs/Partial%20Completion%20Timing%20Diagram.JPG)
+
+## Iteration 5
+
+**Group 12:** Jiayi Han, Declan Koster, Shael Kotecha, Edward Kurita
+
+**Team Responsibilities:**
+- **Shael Kotecha:** TESTING
+- **Declan Koster:** DIAGRAMS AND IMPLEMENTATION ASSISTANCE
+- **Jiayi Han:** IMPLEMENTATION LEAD
+- **Edward Kurita:** DOCUMENTATION
+
+---
+
+### Overview
+
+Iteration 5 adds live performance metrics to the existing architecture. Metrics are tracked and visible through the GUI.
+
+---
+
+### What's New?
+
+- Performance metrics to track fire and drone statuses with time stamps.
+- Live panel: included with the performance metrics
+
+---
+
+### File Structure
+
+```
+SYSC3303_Group_Project/
+│
+├── 📂 clients/                          # DRONE CLIENTS (separate process)
+│   ├── DroneSubsystem.java              # Drone logic with UDP receive
+│   ├── FireEvent.java                    # Fire event data model
+│   ├── DroneState.java                   # Drone state enum (8 states)
+│   └── Main.java                          # Drone client entry point
+│
+├── 📂 intermediate/                      # UPDATED - SCHEDULER (separate process)
+│   ├── Scheduler.java                     # Scheduler with metrics integration
+│   ├── SchedulerState.java                 # UPDATED - FAULT_HANDLING state added
+│   ├── DroneData.java                      # Drone tracking with fault helpers
+│   ├── PerformanceMetrics.java             # NEW - flight/idle/response time tracking
+│   ├── FireEvent.java                       # Fire event data
+│   ├── DroneState.java                       # Drone state enum
+│   └── Main.java                              # Scheduler entry point with shutdown hook
+│
+├── 📂 server/                             # UPDATED - FIRE INCIDENT SUBSYSTEM
+│   ├── FireIncidentSubsystem.java          # Reads fault type from events.csv (5th column)
+│   ├── FireDroneGUI.java                    # UPDATED - metrics panel, fault log, completed counter
+│   ├── GuiUpdateReceiver.java                # UPDATED - parses utilization (field 9) from packets
+│   ├── FireIncidentZone.java                  # Zone management
+│   ├── FireEvent.java                           # Fire event data
+│   ├── Zone.java                                # Zone coordinates
+│   └── Main.java                                  # Fire server entry point
+│
+├── 📂 data/                                # UPDATED - CONFIGURATION FILES
+│   ├── events.csv                           # UPDATED - FaultType column added
+│   └── zones.csv                             # Zone coordinates (unchanged)
+│
+└── 📂 test/                                 # UPDATED - TEST FILES
+    ├── clients/
+    │   ├── DroneSubsystemTest.java
+    │   ├── FireEventTest.java
+    │   ├── Iter3DroneSubsystemTest.java
+    │   └── Iter4Test.java
+    ├── intermediate/
+    │   ├── DroneDataTest.java
+    │   ├── FireEventTest.java
+    │   ├── Iter3SchedulerTest.java
+    │   ├── SchedulerTest.java
+    │   ├── Iter4Test.java
+    │   └── Iter5Test.java    # NEW - PerformanceMetrics unit tests
+    └── server/
+        ├── FireDroneGUITest.java
+        ├── FireEventTest.java
+        ├── FireIncidentSubsystemTest.java
+        ├── Iter3FireIncidentSubsystemTest.java
+        └── Iter4Test.java
+```
+
+---
+
+### Setup and Run
+
+1) Clone the Repository
+2) Open in IntelliJ
+3) Terminal 1 - Start Fire Server (GUI)
+4) Terminal 2 - Start Scheduler
+5) Terminal 3 - Start Drone 1
+6) Terminal 4 - Start Drone 2
+7) Shutdown - Press Ctrl+C in each terminal window
+
+---
+
+### UML Diagrams
