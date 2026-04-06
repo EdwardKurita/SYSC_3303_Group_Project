@@ -510,3 +510,17 @@ SYSC3303_Group_Project/
 ---
 
 ### UML Diagrams
+
+## Class Diagram
+
+![UDP Class Diagram](UMLs/Class%20Diagram%20D5.png)
+
+## State Diagrams
+
+![Scheduler State](UMLs/Scheduler%20States%20D5.png)
+![FireIncidentSubsystem State](UMLs/FireIncidentSubsystem%20States%20D5.png)
+![DroneSubsystem state](UMLs/DroneSubsystem%20State%20D5.png)
+
+## Sequence Diagram
+
+![Sequence Diagram](UMLs/Sequence%20Diagram%20D5.png)
