@@ -236,11 +236,14 @@ public class Scheduler implements Runnable {
                     double utilization = metrics.getUtilization().getOrDefault(drone.getDroneId(), 0.0);
 
 
+                    double battery = (parsed.length > 9) ? Double.parseDouble(parsed[9]) : 100.0; // NEW
+
                     byte[] payload = (drone.getDroneId() + "," + parsed[2] + ","
                             + drone.getPosX() + "," + drone.getPosY() + ","
                             + drone.getCurrentWater() + "," + drone.getCurrentZone() + ","
-                            + severityInfo + "," + faultType + "," // NEW: faultType at end
-                            + String.format("%.1f", utilization)).getBytes();
+                            + severityInfo + "," + faultType + ","
+                            + String.format("%.1f", utilization) + ","
+                            + String.format("%.1f", battery)).getBytes(); // NEW
                     byte[] guiData = new byte[payload.length + 1];
                     guiData[0] = TYPE_GUI_UPDATE;
                     System.arraycopy(payload, 0, guiData, 1, payload.length);
@@ -335,8 +338,9 @@ public class Scheduler implements Runnable {
 
         for (DroneData drone : droneData.values()) {
             if (drone.isAvailable()) {
-                candidate = drone;
-                break;
+                if (candidate == null || drone.getBatteryLevel() > candidate.getBatteryLevel()) {
+                    candidate = drone; // NEW: prefer drone with most battery
+                }
             }
         }
 

@@ -9,7 +9,7 @@ public class DroneData{
     private double posX, posY;
     private String faultType = "NONE";
     private long lastSeenMs  = System.currentTimeMillis();
-
+    private double batteryLevel = 100.0;
     private static final double TANK_CAPACITY = 15.0;
 
     //constructor
@@ -56,6 +56,7 @@ public class DroneData{
         return "DRONE_STUCK".equals(faultType) || "PACKET_LOSS".equals(faultType);
     }
 
+    public double getBatteryLevel() { return batteryLevel; }
     //HELPER FUNCTIONS
 
     //check if the drone is available for new assignment
@@ -88,6 +89,7 @@ public class DroneData{
         this.currentMission = null;
         this.faultType = "NONE"; // clear any fault so drone re-enters fleet cleanly
         refill();
+        batteryLevel = 100.0;
     }
 
 
@@ -100,6 +102,9 @@ public class DroneData{
 
         if (fields.length > 8) {
             setFaultType(fields[8]);
+        }
+        if (fields.length > 9) {
+            batteryLevel = Double.parseDouble(fields[9]);
         }
         updateLastSeen();
 
