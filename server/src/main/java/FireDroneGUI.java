@@ -210,7 +210,6 @@ public class FireDroneGUI extends JFrame {
             metricsArea.setText(sb.toString());
         });
     }
-
     /**
      * Helper method to create a text-based progress bar
      */
@@ -245,8 +244,12 @@ public class FireDroneGUI extends JFrame {
             if ("COMPLETED".equals(status)) {
                 // only clear zone colour on COMPLETED
                 activeFireSeverity.remove(zoneId);
+                decrementActiveFires();
+            } else if ("QUEUED".equals(status)) {
+                activeFireSeverity.remove(zoneId);
             } else if (!"RETURNING".equals(status)
                     && !"RETURNED".equals(status)
+                    && !"FAILED".equals(status)
                     && !"NONE".equals(severity)) {
                 activeFireSeverity.put(zoneId, severity);
             }

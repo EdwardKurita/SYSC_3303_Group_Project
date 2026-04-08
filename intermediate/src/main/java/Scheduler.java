@@ -69,9 +69,11 @@ public class Scheduler implements Runnable {
             // needs to jump out of waiting for a fire event or drone status
             // if there is none
 
-            // timeout after 10 seconds
-            fireSocket.setSoTimeout(500);
-            droneSocket.setSoTimeout(500);
+            fireSocket.setReceiveBufferSize(512 * 1024);   // 512 KB
+            droneSocket.setReceiveBufferSize(512 * 1024);
+
+            fireSocket.setSoTimeout(1);
+            droneSocket.setSoTimeout(1);
 
             while (running) {
                 getFireEvents();
@@ -86,9 +88,7 @@ public class Scheduler implements Runnable {
 
                     case DISPATCHING:
                         boolean dispatched = dispatch();
-                        if (dispatched) {
-                            transition(SchedulerState.MONITORING);
-                        }
+                        transition(SchedulerState.MONITORING);
                         break;
 
                     case MONITORING:
@@ -281,7 +281,11 @@ public class Scheduler implements Runnable {
         DroneData candidate = null;
         for (DroneData drone : droneData.values()) {
             FireEvent curDroneMission = drone.getCurrentMission();
-            if (curDroneMission != null && drone.getPosX() >= bounds[0] && drone.getPosX() <= bounds[2] && drone.getPosY() >= bounds[1] && drone.getPosY() <= bounds[3]) {
+            if (curDroneMission != null
+                    &&drone.getState() != DroneState.FAULTED
+                    && drone.getState() != DroneState.RETURNING
+                    && drone.getPosX() >= bounds[0] && drone.getPosX() <= bounds[2]
+                    && drone.getPosY() >= bounds[1] && drone.getPosY() <= bounds[3]) {
                 candidate = drone;
                 break;
             }
@@ -422,9 +426,13 @@ public class Scheduler implements Runnable {
                 if (drone.getCurrentMission() != null) {
                     // NEW: re-queue without the fault so another drone handles it normally
                     FireEvent original = drone.getCurrentMission();
-                    fireQueue.add(new FireEvent(original.getTime(), original.getZoneId(),
-                            original.getEventType(), original.getSeverity(), "NONE"));
+                    FireEvent requeued = new FireEvent(original.getTime(), original.getZoneId(),
+                            original.getEventType(), original.getSeverity(), "NONE");
+                    fireQueue.add(requeued);
+
                     System.out.println("[SCHEDULER] Re-queued mission: " + original);
+
+                    sendZoneStillActive(requeued);
                 }
 
                 // NEW: hard faults (NOZZLE_JAMMED) permanently remove the drone.
@@ -446,6 +454,23 @@ public class Scheduler implements Runnable {
         for (int id : toRemove) {
             droneData.remove(id);
             droneAddresses.remove(id);
+        }
+    }
+
+    private void sendZoneStillActive(FireEvent event) {
+        try (DatagramSocket s = new DatagramSocket()) {
+            double[] bounds = zoneBounds.getOrDefault(event.getZoneId(), new double[]{0,0,0,0});
+            // Send a GUI update with status "QUEUED" so the zone stays coloured
+            // Reuse an idle drone position (0,0) since no drone is assigned yet
+            byte[] payload = ("0," + "QUEUED,"
+                    + "0.0,0.0,0.0," + event.getZoneId() + ","
+                    + event.getSeverity() + ",NONE,0.0,100.0").getBytes();
+            byte[] data = new byte[payload.length + 1];
+            data[0] = TYPE_GUI_UPDATE;
+            System.arraycopy(payload, 0, data, 1, payload.length);
+            s.send(new DatagramPacket(data, data.length, serverAddress, PORT_FIRE_SERVER));
+        } catch (Exception e) {
+            System.out.println("[ERROR] sendZoneStillActive: " + e.getMessage());
         }
     }
 
