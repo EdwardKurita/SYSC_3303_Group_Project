@@ -30,6 +30,8 @@ public class DroneSubsystem implements Runnable {
     private int droneId;
 
     private double posX = 0, posY = 0;
+    private double batteryLevel = 100.0;
+    private static final double BATTERY_DRAIN_PER_METER = 0.005;
 
     private static final byte TYPE_DRONE_ASSIGNMENT = 0x02;
     private static final byte TYPE_DRONE_STATUS = 0x03;
@@ -208,6 +210,7 @@ public class DroneSubsystem implements Runnable {
                             // use zone 0 during return animation so GUI moves drone back to base
                             animatePosition(socket, posX, posY, 0, 0, travelMs, FAULT_NONE, 0);
                             currentWater = TANK_CAPACITY;
+                            batteryLevel = 100.0;
                             currentZoneId = 0;
                             currentZone = 0;
                             posX = 0;
@@ -281,12 +284,17 @@ public class DroneSubsystem implements Runnable {
         int  steps  = 10;
         long stepMs = Math.max(1, totalMs / steps);
 
+        double totalDistance = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+        double drainPerStep  = totalDistance * BATTERY_DRAIN_PER_METER / steps;
+
         for (int i = 1; i <= steps; i++) {
             double t = (double) i / steps;
             posX = fromX + (toX - fromX) * t;
             posY = fromY + (toY - fromY) * t;
 
-            // NEW: PACKET_LOSS — randomly drop ~50% of status packets
+            batteryLevel = Math.max(0, batteryLevel - drainPerStep);
+
+            // PACKET_LOSS — randomly drop ~50% of status packets
             boolean drop = FAULT_PACKET_LOSS.equals(faultType) && Math.random() < 0.5;
             if (!drop) {
                 sendStatusPacket(socket, reportZone, state.name(),
@@ -304,7 +312,8 @@ public class DroneSubsystem implements Runnable {
         try {
             byte[] payload = (droneId + "," + zoneId + "," + status + ","
                     + message + "," + waterUsed + "," + currentWater + ","
-                    + posX + "," + posY + "," + faultType).getBytes();
+                    + posX + "," + posY + "," + faultType + ","
+                    + String.format("%.1f", batteryLevel)).getBytes(); // NEW
             byte[] data = new byte[payload.length + 1];
             data[0] = TYPE_DRONE_STATUS;
             System.arraycopy(payload, 0, data, 1, payload.length);

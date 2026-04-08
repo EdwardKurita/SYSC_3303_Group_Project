@@ -38,11 +38,13 @@ public class GuiUpdateReceiver implements Runnable {
                     String faultType      = (parsed.length > 7) ? parsed[7] : "NONE"; // NEW
 
                     //field 9:
+                    double battery = (parsed.length > 9) ? Double.parseDouble(parsed[9]) : 100.0;
+
                     if (parsed.length > 8) {
                         droneUtilization.put(droneId, Double.parseDouble(parsed[8]));
                     }
 
-                    gui.updateDroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity, faultType);
+                    gui.updateDroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity, faultType, battery);
                     gui.updateMetricsDisplay(gui.getActiveFireCount(), droneUtilization);
                 } else if (data[0] == TYPE_SHUTDOWN) {
                     gui.log("[GUI] Shutdown received.");

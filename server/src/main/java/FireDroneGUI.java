@@ -23,6 +23,8 @@ public class FireDroneGUI extends JFrame {
     private JPanel metricsPanel;              // Container for metrics
     private int completedFires = 0;           // Counter for completed fires
 
+    private final Map<Integer, Double> droneBattery = new ConcurrentHashMap<>();
+
     public FireDroneGUI(List<FireIncidentZone> zones) {
         setTitle("Firefighting Drone System – Fire Incident Server");
         setSize(1200, 950);
@@ -196,6 +198,15 @@ public class FireDroneGUI extends JFrame {
             sb.append("Red: Nozzle jammed\n");
             sb.append("Orange: Packet loss\n");
 
+            sb.append("\n=== BATTERY ===\n");
+            for (Map.Entry<Integer, Double> entry : droneBattery.entrySet()) {
+                double bat = entry.getValue();
+                String bar = createProgressBar(bat);
+                String level = bat > 60 ? "" : bat > 30 ? " [LOW]" : " [CRITICAL]";
+                sb.append(String.format("Drone %d: %5.1f%% %s%s\n",
+                        entry.getKey(), bat, bar, level));
+            }
+
             metricsArea.setText(sb.toString());
         });
     }
@@ -225,11 +236,10 @@ public class FireDroneGUI extends JFrame {
     // ===== DRONE UPDATES =====
     public void updateDroneMarker(int droneId, String status, double posX, double posY,
                                   double waterRemaining, int zoneId, String severity,
-                                  String faultType) {
+                                  String faultType, double battery) {
 
-        droneMarkers.put(droneId, new DroneMarker(droneId, status, posX, posY,
-                waterRemaining, zoneId, severity, faultType));
-
+        droneMarkers.put(droneId, new DroneMarker(droneId, status, posX, posY, waterRemaining, zoneId, severity, faultType));
+        droneBattery.put(droneId, battery);
         // Track active fire severity per zone
         if (zoneId > 0) {
             if ("COMPLETED".equals(status)) {

@@ -69,12 +69,9 @@ public class Scheduler implements Runnable {
             // needs to jump out of waiting for a fire event or drone status
             // if there is none
 
-            fireSocket.setReceiveBufferSize(256*1024);
-            droneSocket.setReceiveBufferSize(256*1024);
-
-            // very short timeout
-            fireSocket.setSoTimeout(1);
-            droneSocket.setSoTimeout(1);
+            // timeout after 10 seconds
+            fireSocket.setSoTimeout(500);
+            droneSocket.setSoTimeout(500);
 
             while (running) {
                 getFireEvents();
@@ -165,90 +162,100 @@ public class Scheduler implements Runnable {
     }
 
     private void getDroneStatus() {
-        while (true) {
-            try {
-                byte[] data = new byte[1024];
-                DatagramPacket packet = new DatagramPacket(data, data.length);
-                droneSocket.receive(packet);
-                processDroneStatusPacket(packet);
-            } catch (SocketTimeoutException e) {
-                break; // no more packets available
-            } catch (Exception e) {
-                System.out.println("[ERROR] Scheduler - getDroneStatus: " + e.getMessage());
-                break;
+        try {
+            byte[] data = new byte[1024];
+            DatagramPacket packet = new DatagramPacket(data, data.length);
+            droneSocket.receive(packet);
+
+            int len = packet.getLength();
+
+            if (data[0] == TYPE_DRONE_STATUS) {
+                String[] parsed = new String(data, 1, len - 1).split(",");
+                int droneId = Integer.parseInt(parsed[0]);
+
+                droneAddresses.putIfAbsent(droneId, packet.getAddress());
+                droneData.putIfAbsent(droneId, new DroneData(droneId));
+
+                DroneData drone = droneData.get(droneId);
+                drone.updateFromResponse(parsed); // updateLastSeen() called inside
+
+                // timestamp key lifecycle events
+                switch (parsed[2]) {
+                    case "ARRIVED":
+                        log("ARRIVED    drone=" + droneId + " zone=" + parsed[1]);
+                        break;
+                    case "EXTINGUISHING":
+                        log("EXTINGUISHING drone=" + droneId + " zone=" + parsed[1]);
+                        break;
+                    case "COMPLETED":
+                        log("COMPLETED  drone=" + droneId + " zone=" + parsed[1] + " waterUsed=" + parsed[4] + "L");
+                        // Record when fire is extinguished for metrics
+                        metrics.logFireExtinguished(Integer.parseInt(parsed[1]));
+                        break;
+                    case "RETURNED":
+                        log("RETURNED   drone=" + droneId + " — refilled and ready");
+                        // Record drone return for metrics
+                        metrics.logDroneReturned(droneId);
+                        break;
+                    case "FAULTED":
+                    case "DRONE_STUCK":
+                    case "NOZZLE_JAMMED":
+                        log("FAULT      drone=" + droneId + " type=" + parsed[2]);
+                        break;
+                }
+
+                if (drone.getCurrentMission() != null && parsed[2].equals("PARTIAL")) {
+                    double remaining = drone.getCurrentMission().getWaterNeeded()
+                            - Double.parseDouble(parsed[4]);
+                    if (remaining >= 1) {
+                        String severity;
+                        if (remaining >= 25) severity = "High";
+                        else if (remaining >= 15) severity = "Moderate";
+                        else severity = "Low";
+                        partialSeverity.put(droneId, severity);
+                        fireQueue.add(new FireEvent("Now", Integer.parseInt(parsed[1]), "FIRE_DETECTED", severity, "NONE"));
+                    }
+                } else if (parsed[2].equals("RETURNED")) {
+                    partialSeverity.remove(droneId);
+                }
+
+                // read faultType from parsed[8]
+                String faultType = (parsed.length > 8) ? parsed[8] : "NONE";
+
+                try (DatagramSocket guiUpdate = new DatagramSocket()) {
+                    // faultType added as 8th field in GUI payload
+                    String severityInfo = partialSeverity.containsKey(drone.getDroneId())
+                            ? partialSeverity.get(drone.getDroneId())
+                            : (parsed[2].equals("RETURNING") || parsed[2].equals("RETURNED")
+                            ? "NONE"
+                            : (drone.getCurrentMission() != null
+                            ? drone.getCurrentMission().getSeverity()
+                            : "NONE"));
+
+                    //append utilization as field 9 so server can display it in live metrics
+                    double utilization = metrics.getUtilization().getOrDefault(drone.getDroneId(), 0.0);
+
+
+                    double battery = (parsed.length > 9) ? Double.parseDouble(parsed[9]) : 100.0; // NEW
+
+                    byte[] payload = (drone.getDroneId() + "," + parsed[2] + ","
+                            + drone.getPosX() + "," + drone.getPosY() + ","
+                            + drone.getCurrentWater() + "," + drone.getCurrentZone() + ","
+                            + severityInfo + "," + faultType + ","
+                            + String.format("%.1f", utilization) + ","
+                            + String.format("%.1f", battery)).getBytes(); // NEW
+                    byte[] guiData = new byte[payload.length + 1];
+                    guiData[0] = TYPE_GUI_UPDATE;
+                    System.arraycopy(payload, 0, guiData, 1, payload.length);
+                    guiUpdate.send(new DatagramPacket(guiData, guiData.length,
+                            serverAddress, PORT_FIRE_SERVER));
+                } catch (Exception e) {
+                    System.out.println("[ERROR] Scheduler - getDroneStatus: " + e.getMessage());
+                }
             }
-        }
-    }
-
-    // Extracted packet processing logic
-    private void processDroneStatusPacket(DatagramPacket packet) {
-        byte[] data = packet.getData();
-        int len = packet.getLength();
-        if (data[0] != TYPE_DRONE_STATUS) return;
-
-        String[] parsed = new String(data, 1, len - 1).split(",");
-        int droneId = Integer.parseInt(parsed[0]);
-
-        droneAddresses.putIfAbsent(droneId, packet.getAddress());
-        droneData.putIfAbsent(droneId, new DroneData(droneId));
-
-        DroneData drone = droneData.get(droneId);
-        drone.updateFromResponse(parsed); // includes updateLastSeen()
-
-        // Log key lifecycle events (same as original)
-        switch (parsed[2]) {
-            case "ARRIVED":
-                log("ARRIVED    drone=" + droneId + " zone=" + parsed[1]);
-                break;
-            case "EXTINGUISHING":
-                log("EXTINGUISHING drone=" + droneId + " zone=" + parsed[1]);
-                break;
-            case "COMPLETED":
-                log("COMPLETED  drone=" + droneId + " zone=" + parsed[1] + " waterUsed=" + parsed[4] + "L");
-                metrics.logFireExtinguished(Integer.parseInt(parsed[1]));
-                break;
-            case "RETURNED":
-                log("RETURNED   drone=" + droneId + " — refilled and ready");
-                metrics.logDroneReturned(droneId);
-                break;
-            case "FAULTED":
-            case "DRONE_STUCK":
-            case "NOZZLE_JAMMED":
-                log("FAULT      drone=" + droneId + " type=" + parsed[2]);
-                break;
-        }
-
-        // Partial fire re‑queue logic (unchanged)
-        if (drone.getCurrentMission() != null && parsed[2].equals("PARTIAL")) {
-            double remaining = drone.getCurrentMission().getWaterNeeded() - Double.parseDouble(parsed[4]);
-            if (remaining >= 1) {
-                String severity = remaining >= 25 ? "High" : (remaining >= 15 ? "Moderate" : "Low");
-                partialSeverity.put(droneId, severity);
-                fireQueue.add(new FireEvent("Now", Integer.parseInt(parsed[1]), "FIRE_DETECTED", severity, "NONE"));
-            }
-        } else if (parsed[2].equals("RETURNED")) {
-            partialSeverity.remove(droneId);
-        }
-
-        // Send GUI update (same as original, but using the extracted faultType)
-        String faultType = (parsed.length > 8) ? parsed[8] : "NONE";
-        String severityInfo = partialSeverity.containsKey(droneId)
-                ? partialSeverity.get(droneId)
-                : (parsed[2].equals("RETURNING") || parsed[2].equals("RETURNED")
-                ? "NONE"
-                : (drone.getCurrentMission() != null ? drone.getCurrentMission().getSeverity() : "NONE"));
-        double utilization = metrics.getUtilization().getOrDefault(droneId, 0.0);
-
-        try (DatagramSocket guiUpdate = new DatagramSocket()) {
-            byte[] payload = (droneId + "," + parsed[2] + "," + drone.getPosX() + "," + drone.getPosY() + ","
-                    + drone.getCurrentWater() + "," + drone.getCurrentZone() + ","
-                    + severityInfo + "," + faultType + "," + String.format("%.1f", utilization)).getBytes();
-            byte[] guiData = new byte[payload.length + 1];
-            guiData[0] = TYPE_GUI_UPDATE;
-            System.arraycopy(payload, 0, guiData, 1, payload.length);
-            guiUpdate.send(new DatagramPacket(guiData, guiData.length, serverAddress, PORT_FIRE_SERVER));
+        } catch (SocketTimeoutException ignored) {
         } catch (Exception e) {
-            System.out.println("[ERROR] Scheduler - GUI update: " + e.getMessage());
+            System.out.println("[ERROR] Scheduler - getDroneStatus: " + e.getMessage());
         }
     }
 
@@ -274,11 +281,7 @@ public class Scheduler implements Runnable {
         DroneData candidate = null;
         for (DroneData drone : droneData.values()) {
             FireEvent curDroneMission = drone.getCurrentMission();
-            if (curDroneMission != null
-                    && drone.getState() != DroneState.FAULTED
-                    && drone.getState() != DroneState.RETURNING
-                    && drone.getPosX() >= bounds[0] && drone.getPosX() <= bounds[2]
-                    && drone.getPosY() >= bounds[1] && drone.getPosY() <= bounds[3]) {
+            if (curDroneMission != null && drone.getPosX() >= bounds[0] && drone.getPosX() <= bounds[2] && drone.getPosY() >= bounds[1] && drone.getPosY() <= bounds[3]) {
                 candidate = drone;
                 break;
             }
@@ -335,8 +338,9 @@ public class Scheduler implements Runnable {
 
         for (DroneData drone : droneData.values()) {
             if (drone.isAvailable()) {
-                candidate = drone;
-                break;
+                if (candidate == null || drone.getBatteryLevel() > candidate.getBatteryLevel()) {
+                    candidate = drone; // NEW: prefer drone with most battery
+                }
             }
         }
 
