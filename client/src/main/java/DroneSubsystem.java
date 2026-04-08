@@ -252,7 +252,7 @@ public class DroneSubsystem implements Runnable {
                                 currentZoneId = 0;
                                 currentZone = 0;
                                 activeFault = FAULT_NONE;
-                                state = DroneState.FAULTED;
+                                state = DroneState.IDLE;
                                 sendStatusPacket(socket, 0, "RETURNED",
                                         "Returned after fault", 0.0, FAULT_NONE);
                             } catch (Exception e) {
