@@ -2,6 +2,10 @@ import java.io.*;
 import java.net.*;
 import java.util.*;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+
+
 // FireIncidentSubsystem reads fire events and zone data from CSV files
 public class FireIncidentSubsystem implements Runnable {
     static final int PORT_FIRE_SERVER = 5000; // gui updates
@@ -22,6 +26,10 @@ public class FireIncidentSubsystem implements Runnable {
     private final InetAddress intermediate;
 
     private FireIncidentState state = FireIncidentState.LOADING;
+
+    private static final int SPEEDUP = 100;
+
+    private final BlockingQueue<FireEvent> eventQueue = new LinkedBlockingQueue<>();
 
     // Constructor
     public FireIncidentSubsystem(FireDroneGUI gui, String eventFilePath, String zoneFilePath, InetAddress intermediate) {// CHANGE
@@ -161,6 +169,9 @@ public class FireIncidentSubsystem implements Runnable {
 
             br.readLine(); // skip header
             String line;
+            int prevSeconds = 0;
+            boolean first = true;
+
             while ((line = br.readLine()) != null) {
                 String[] parts = line.split(",");
 
@@ -171,6 +182,18 @@ public class FireIncidentSubsystem implements Runnable {
                 String faultType = (parts.length > 4) ? parts[4].trim() : "NONE"; // NEW
 
                 FireEvent event = new FireEvent(time, zoneId, eventType, severity, faultType); // NEW
+                int eventSeconds = event.getTimeInSeconds();
+
+                if (!first) {
+                    int gap = eventSeconds - prevSeconds;
+                    long sleepMs = (gap * 1000L) / SPEEDUP;
+                    if (sleepMs > 0) {
+                        Thread.sleep(sleepMs);
+                    }
+                }
+                first = false;
+                prevSeconds = eventSeconds;
+
                 gui.log("[FIRE] Detected: " + event);
                 gui.incrementActiveFires();
                 gui.updateZoneFire(zoneId, severity);

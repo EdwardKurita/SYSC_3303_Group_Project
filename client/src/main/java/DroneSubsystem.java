@@ -44,6 +44,8 @@ public class DroneSubsystem implements Runnable {
 
     private String activeFault = FAULT_NONE;
 
+    private static final int SPEEDUP = 100;
+
     // scheduler sends missions here
     //private BlockingQueue<FireEvent> missionQueue = new LinkedBlockingQueue<>();
 
@@ -112,7 +114,7 @@ public class DroneSubsystem implements Runnable {
             double distance = Math.sqrt(targetX * targetX + targetY * targetY);
             double travelTime = calculateTravelTime(distance);
             double dropTime = calculateDropTime(waterNeeded);
-            long travelMs = (long)(travelTime * 100); // 10x speed-up
+            long travelMs = (long)(travelTime * 1000 / SPEEDUP);
             String severity = event.getSeverity();
 
             activeFault = event.getFaultType();
@@ -176,7 +178,7 @@ public class DroneSubsystem implements Runnable {
                             sendStatusPacket(socket, zoneId, "EXTINGUISHING",
                                     "Dropping water at " + WATER_DROP_RATE + " L/s",
                                     0.0, activeFault);
-                            Thread.sleep((long)(dropTime * 100));
+                            Thread.sleep((long)(dropTime * 1000/SPEEDUP));
 
                             if (actualUsed >= waterNeeded) {
                                 transition(DroneState.COMPLETED);
@@ -239,21 +241,24 @@ public class DroneSubsystem implements Runnable {
                                 sendStatusPacket(socket, zoneId, "RETURNING",
                                         "Returning to base after fault", 0.0, activeFault);
                                 animatePosition(socket, posX, posY, 0, 0,
-                                        (long)(calculateTravelTime(Math.sqrt(posX * posX + posY * posY)) * 100),
+                                        (long)(calculateTravelTime(Math.sqrt(posX * posX + posY * posY)) * 1000 / SPEEDUP),
                                         FAULT_NONE, 0);
                                 posX = 0;
                                 posY = 0;
                                 currentWater = TANK_CAPACITY;
                                 currentZoneId = 0;
                                 currentZone = 0;
+                                activeFault = FAULT_NONE;
+                                state = DroneState.FAULTED;
                                 sendStatusPacket(socket, 0, "RETURNED",
                                         "Returned after fault", 0.0, FAULT_NONE);
                             } catch (Exception e) {
                                 System.out.println("[Drone-" + droneId + "] Error returning after fault: " + e.getMessage());
                             }
+                        } else {
+                            running = false;
+                            return;
                         }
-                        running = false;
-                        return;
                 }
             }
         } catch (Exception e) {
