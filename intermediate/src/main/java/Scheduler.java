@@ -30,6 +30,7 @@ public class Scheduler implements Runnable {
     private final InetAddress serverAddress;
 
     boolean running = true;
+    private volatile boolean allEventsSent = false;
 
     private Queue<FireEvent> fireQueue = new LinkedList<>();
     private final Map<Integer, DroneData> droneData = new HashMap<>();
@@ -97,8 +98,9 @@ public class Scheduler implements Runnable {
                             transition(SchedulerState.FAULT_HANDLING);
                         } else if (!fireQueue.isEmpty()) {
                             transition(SchedulerState.DISPATCHING);
-                        } else if (droneData.values().stream().allMatch(DroneData::isAvailable)) {
-                            transition(SchedulerState.WAITING);
+                        } else if (!droneData.isEmpty() && allEventsSent && droneData.values().stream().allMatch(DroneData::isAvailable)) {
+                            // All fires handled and all drones back at base — simulation complete
+                            running = false;
                         }
                         break;
 
@@ -114,6 +116,8 @@ public class Scheduler implements Runnable {
                 System.out.println("[ERROR] Scheduler: " + e.getMessage());
             }
         }
+
+        sendShutdown();
 
         if (fireSocket != null) {
             fireSocket.close();
@@ -151,8 +155,8 @@ public class Scheduler implements Runnable {
                 }
 
             } else if (data[0] == TYPE_SHUTDOWN) {
-                running = false;
-                System.out.println("Shut down triggered");
+                allEventsSent = true;
+                log("All fire events received from FireIncidentSubsystem.");
             }
 
         } catch (SocketTimeoutException ignored) {
@@ -353,8 +357,8 @@ public class Scheduler implements Runnable {
             boolean anyIdle = droneData.values().stream().anyMatch(DroneData::isAvailable);
             if (anyIdle) {
                 log("DISPATCH_WAIT fire=zone:" + event.getZoneId()
-                    + " needs=" + event.getWaterNeeded() + "L"
-                    + " - no drone has sufficient water, waiting for refill");
+                        + " needs=" + event.getWaterNeeded() + "L"
+                        + " - no drone has sufficient water, waiting for refill");
             }
             return false;
         }
@@ -477,6 +481,38 @@ public class Scheduler implements Runnable {
     /** Timestamped structured log line for key scheduler events. */
     private void log(String msg) {
         System.out.println("[" + TS.format(new Date()) + "] [SCHEDULER] " + msg);
+    }
+
+    /**
+     * Sends a TYPE_SHUTDOWN packet to every known drone and to the GUI server.
+     * Called once, just before the scheduler closes its sockets.
+     */
+    private void sendShutdown() {
+        byte[] data = new byte[]{ TYPE_SHUTDOWN };
+
+        try (DatagramSocket s = new DatagramSocket()) {
+            // Notify every drone that registered with us
+            for (Map.Entry<Integer, InetAddress> entry : droneAddresses.entrySet()) {
+                int port = PORT_DRONE_BASE + entry.getKey();
+                try {
+                    s.send(new DatagramPacket(data, data.length, entry.getValue(), port));
+                    log("SHUTDOWN sent to Drone " + entry.getKey() + " at port " + port);
+                } catch (Exception e) {
+                    System.out.println("[ERROR] sendShutdown drone-" + entry.getKey() + ": " + e.getMessage());
+                }
+            }
+
+            // Notify the GUI receiver (GuiUpdateReceiver listens on PORT_FIRE_SERVER)
+            try {
+                s.send(new DatagramPacket(data, data.length, serverAddress, PORT_FIRE_SERVER));
+                log("SHUTDOWN sent to GUI at " + serverAddress.getHostAddress() + ":" + PORT_FIRE_SERVER);
+            } catch (Exception e) {
+                System.out.println("[ERROR] sendShutdown GUI: " + e.getMessage());
+            }
+
+        } catch (Exception e) {
+            System.out.println("[ERROR] sendShutdown: " + e.getMessage());
+        }
     }
 
     // Add shutdown hook

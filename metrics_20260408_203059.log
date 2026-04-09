@@ -1,0 +1,608 @@
+============================================================
+METRICS LOG STARTED: 20:30:59.112
+============================================================
+[METRICS] Fire detected at Zone 2 (Low) at 20:31:01.163
+[METRICS] Drone 1 dispatched to Zone 2 at 20:31:01.164
+[METRICS] Fire at Zone 2 extinguished! Response time: 1321ms
+[METRICS] Drone 1 returned to base at 20:31:03.726
+[METRICS] Fire detected at Zone 1 (Moderate) at 20:31:06.549
+[METRICS] Drone 1 dispatched to Zone 1 at 20:31:06.549
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:07.048
+[METRICS] Drone 2 dispatched to Zone 5 at 20:31:07.048
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:07.070
+[METRICS] Drone 2 dispatched to Zone 5 at 20:31:07.070
+[METRICS] Fire detected at Zone 1 (Low) at 20:31:07.253
+[METRICS] Drone 3 dispatched to Zone 1 at 20:31:07.254
+[METRICS] Drone 1 returned to base at 20:31:07.750
+[METRICS] Fire at Zone 1 extinguished! Response time: 577ms
+[METRICS] Fire detected at Zone 3 (Moderate) at 20:31:08.119
+[METRICS] Drone 1 dispatched to Zone 3 at 20:31:08.119
+[METRICS] Drone 3 returned to base at 20:31:08.327
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:31:08.773
+[METRICS] Drone 3 dispatched to Zone 4 at 20:31:08.773
+[METRICS] Fire detected at Zone 3 (Low) at 20:31:09.387
+[METRICS] Drone 4 dispatched to Zone 3 at 20:31:09.387
+[METRICS] Drone 1 returned to base at 20:31:10.443
+[METRICS] Fire at Zone 3 extinguished! Response time: 1138ms
+[METRICS] Fire detected at Zone 4 (Low) at 20:31:10.580
+[METRICS] Drone 1 dispatched to Zone 4 at 20:31:10.580
+[METRICS] Drone 4 returned to base at 20:31:11.586
+[METRICS] Drone 3 returned to base at 20:31:12.177
+[METRICS] Fire at Zone 4 extinguished! Response time: 1670ms
+[METRICS] Drone 1 returned to base at 20:31:13.855
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:19.073
+[METRICS] Drone 1 dispatched to Zone 5 at 20:31:19.073
+[METRICS] Fire at Zone 5 extinguished! Response time: 1800ms
+[METRICS] Drone 2 returned to base at 20:31:22.085
+[METRICS] Drone 1 returned to base at 20:31:22.605
+[METRICS] Fire at Zone 5 extinguished! Response time: 4807ms
+[METRICS] Drone 2 returned to base at 20:31:25.610
+[METRICS] Fire detected at Zone 1 (Low) at 20:31:26.842
+[METRICS] Drone 1 dispatched to Zone 1 at 20:31:26.842
+[METRICS] Fire at Zone 1 extinguished! Response time: 566ms
+[METRICS] Drone 1 returned to base at 20:31:27.909
+[METRICS] Fire detected at Zone 2 (Low) at 20:31:29.063
+[METRICS] Drone 1 dispatched to Zone 2 at 20:31:29.063
+[METRICS] Fire at Zone 2 extinguished! Response time: 1309ms
+[METRICS] Fire detected at Zone 4 (High) at 20:31:31.851
+[METRICS] Drone 2 dispatched to Zone 4 at 20:31:31.851
+[METRICS] Fire detected at Zone 5 (High) at 20:31:31.944
+[METRICS] Drone 3 dispatched to Zone 5 at 20:31:31.944
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:31:33.652
+[METRICS] Drone 4 dispatched to Zone 4 at 20:31:33.652
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:33.879
+[METRICS] Drone 5 dispatched to Zone 5 at 20:31:33.879
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:33.889
+[METRICS] Drone 6 dispatched to Zone 5 at 20:31:33.889
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:33.899
+[METRICS] Drone 7 dispatched to Zone 5 at 20:31:33.899
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:33.908
+[METRICS] Drone 8 dispatched to Zone 5 at 20:31:33.908
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:33.917
+[METRICS] Drone 9 dispatched to Zone 5 at 20:31:33.917
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:33.927
+[METRICS] Drone 10 dispatched to Zone 5 at 20:31:33.927
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:33.935
+[METRICS] Drone 11 dispatched to Zone 5 at 20:31:33.935
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:34.844
+[METRICS] Drone 12 dispatched to Zone 5 at 20:31:34.844
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:34.854
+[METRICS] Drone 13 dispatched to Zone 5 at 20:31:34.854
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:34.863
+[METRICS] Drone 14 dispatched to Zone 5 at 20:31:34.863
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:34.872
+[METRICS] Drone 14 dispatched to Zone 5 at 20:31:34.872
+[METRICS] Drone 2 returned to base at 20:31:35.249
+[METRICS] Fire detected at Zone 4 (Low) at 20:31:35.461
+[METRICS] Drone 2 dispatched to Zone 4 at 20:31:35.461
+[METRICS] Drone 3 returned to base at 20:31:35.605
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:31:35.876
+[METRICS] Drone 3 dispatched to Zone 5 at 20:31:35.876
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:36.804
+[METRICS] Drone 15 dispatched to Zone 5 at 20:31:36.804
+[METRICS] Drone 4 returned to base at 20:31:37.057
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:37.059
+[METRICS] Drone 4 dispatched to Zone 5 at 20:31:37.059
+[METRICS] Fire at Zone 4 extinguished! Response time: 1667ms
+[METRICS] Drone 5 returned to base at 20:31:37.545
+[METRICS] Drone 6 returned to base at 20:31:37.556
+[METRICS] Drone 7 returned to base at 20:31:37.565
+[METRICS] Drone 8 returned to base at 20:31:37.576
+[METRICS] Drone 9 returned to base at 20:31:37.585
+[METRICS] Drone 10 returned to base at 20:31:37.593
+[METRICS] Drone 11 returned to base at 20:31:37.601
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:37.811
+[METRICS] Drone 5 dispatched to Zone 5 at 20:31:37.811
+[METRICS] Drone 12 returned to base at 20:31:38.515
+[METRICS] Drone 13 returned to base at 20:31:38.525
+[METRICS] Drone 14 returned to base at 20:31:38.531
+[METRICS] Fire at Zone 5 extinguished! Response time: 797ms
+[METRICS] Drone 2 returned to base at 20:31:38.728
+[METRICS] Fire at Zone 5 extinguished! Response time: 1044ms
+[METRICS] Drone 3 returned to base at 20:31:39.541
+[METRICS] Fire at Zone 5 extinguished! Response time: 1798ms
+[METRICS] Drone 15 returned to base at 20:31:40.339
+[METRICS] Drone 4 returned to base at 20:31:40.586
+[METRICS] Drone 5 returned to base at 20:31:41.339
+[METRICS] Drone 14 returned to base at 20:31:42.191
+[METRICS] Fire detected at Zone 2 (Low) at 20:31:43.496
+[METRICS] Drone 2 dispatched to Zone 2 at 20:31:43.496
+[METRICS] Fire detected at Zone 2 (Low) at 20:31:44.088
+[METRICS] Drone 3 dispatched to Zone 2 at 20:31:44.088
+[METRICS] Fire at Zone 2 extinguished! Response time: 719ms
+[METRICS] Fire at Zone 2 extinguished! Response time: 1309ms
+[METRICS] Drone 2 returned to base at 20:31:46.045
+[METRICS] Fire at Zone 1 extinguished! Response time: 19770ms
+[METRICS] Drone 3 returned to base at 20:31:46.633
+[METRICS] Drone 2 returned to base at 20:31:47.114
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:49.306
+[METRICS] Drone 2 dispatched to Zone 5 at 20:31:49.306
+[METRICS] Fire detected at Zone 5 (Low) at 20:31:50.678
+[METRICS] Drone 3 dispatched to Zone 5 at 20:31:50.678
+[METRICS] Fire at Zone 5 extinguished! Response time: 424ms
+[METRICS] Fire at Zone 5 extinguished! Response time: 1797ms
+[METRICS] Drone 2 returned to base at 20:31:52.830
+[METRICS] Drone 3 returned to base at 20:31:54.204
+[METRICS] Fire detected at Zone 4 (High) at 20:32:03.519
+[METRICS] Drone 2 dispatched to Zone 4 at 20:32:03.519
+[METRICS] Fire detected at Zone 4 (High) at 20:32:04.849
+[METRICS] Drone 2 dispatched to Zone 4 at 20:32:04.849
+[METRICS] Fire detected at Zone 4 (High) at 20:32:07.840
+[METRICS] Drone 3 dispatched to Zone 4 at 20:32:07.840
+[METRICS] Fire detected at Zone 4 (High) at 20:32:07.847
+[METRICS] Drone 2 dispatched to Zone 4 at 20:32:07.847
+[METRICS] Fire detected at Zone 4 (High) at 20:32:07.853
+[METRICS] Drone 4 dispatched to Zone 4 at 20:32:07.853
+[METRICS] Drone 2 returned to base at 20:32:07.857
+[METRICS] Fire detected at Zone 4 (High) at 20:32:07.859
+[METRICS] Drone 4 dispatched to Zone 4 at 20:32:07.859
+[METRICS] Fire detected at Zone 5 (High) at 20:32:08.919
+[METRICS] Drone 5 dispatched to Zone 5 at 20:32:08.919
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:32:09.659
+[METRICS] Drone 6 dispatched to Zone 4 at 20:32:09.659
+[METRICS] Fire detected at Zone 2 (High) at 20:32:10.010
+[METRICS] Drone 7 dispatched to Zone 2 at 20:32:10.010
+[METRICS] Fire detected at Zone 2 (High) at 20:32:10.021
+[METRICS] Drone 7 dispatched to Zone 2 at 20:32:10.021
+[METRICS] Fire detected at Zone 3 (High) at 20:32:10.601
+[METRICS] Drone 8 dispatched to Zone 3 at 20:32:10.601
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:32:10.850
+[METRICS] Drone 9 dispatched to Zone 5 at 20:32:10.850
+[METRICS] Drone 3 returned to base at 20:32:11.243
+[METRICS] Drone 2 returned to base at 20:32:11.249
+[METRICS] Drone 4 returned to base at 20:32:11.258
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:32:11.455
+[METRICS] Drone 3 dispatched to Zone 2 at 20:32:11.455
+[METRICS] Fire detected at Zone 4 (Low) at 20:32:11.463
+[METRICS] Drone 10 dispatched to Zone 4 at 20:32:11.463
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:32:11.511
+[METRICS] Drone 12 dispatched to Zone 2 at 20:32:11.511
+[METRICS] Fire detected at Zone 3 (Moderate) at 20:32:11.864
+[METRICS] Drone 13 dispatched to Zone 3 at 20:32:11.864
+[METRICS] Drone 5 returned to base at 20:32:12.575
+[METRICS] Fire detected at Zone 5 (Low) at 20:32:12.784
+[METRICS] Drone 5 dispatched to Zone 5 at 20:32:12.784
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:32:12.896
+[METRICS] Drone 14 dispatched to Zone 2 at 20:32:12.896
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:32:12.902
+[METRICS] Drone 15 dispatched to Zone 2 at 20:32:12.902
+[METRICS] Drone 8 returned to base at 20:32:12.920
+[METRICS] Fire detected at Zone 2 (Low) at 20:32:12.956
+[METRICS] Drone 8 dispatched to Zone 2 at 20:32:12.956
+[METRICS] Drone 6 returned to base at 20:32:13.062
+[METRICS] Fire detected at Zone 3 (Low) at 20:32:13.129
+[METRICS] Drone 6 dispatched to Zone 3 at 20:32:13.129
+[METRICS] Fire at Zone 4 extinguished! Response time: 1673ms
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:32:14.134
+[METRICS] Drone 1 dispatched to Zone 2 at 20:32:14.134
+[METRICS] Drone 3 returned to base at 20:32:14.138
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:32:14.140
+[METRICS] Drone 1 dispatched to Zone 2 at 20:32:14.140
+[METRICS] Drone 13 returned to base at 20:32:14.188
+[METRICS] Drone 12 returned to base at 20:32:14.194
+[METRICS] Fire at Zone 3 extinguished! Response time: 1125ms
+[METRICS] Fire at Zone 2 extinguished! Response time: 125ms
+[METRICS] Fire detected at Zone 2 (Low) at 20:32:14.352
+[METRICS] Drone 12 dispatched to Zone 2 at 20:32:14.352
+[METRICS] Drone 9 returned to base at 20:32:14.512
+[METRICS] Fire at Zone 5 extinguished! Response time: 1800ms
+[METRICS] Fire detected at Zone 4 (Low) at 20:32:14.602
+[METRICS] Drone 9 dispatched to Zone 4 at 20:32:14.602
+[METRICS] Drone 2 returned to base at 20:32:14.644
+[METRICS] Drone 4 returned to base at 20:32:14.656
+[METRICS] Drone 10 returned to base at 20:32:14.732
+[METRICS] Drone 6 returned to base at 20:32:15.315
+[METRICS] Drone 3 returned to base at 20:32:15.328
+[METRICS] Drone 7 returned to base at 20:32:15.371
+[METRICS] Drone 8 returned to base at 20:32:15.501
+[METRICS] Fire detected at Zone 2 (Low) at 20:32:15.579
+[METRICS] Drone 3 dispatched to Zone 2 at 20:32:15.579
+[METRICS] Drone 14 returned to base at 20:32:15.583
+[METRICS] Drone 15 returned to base at 20:32:15.585
+[METRICS] Fire at Zone 2 extinguished! Response time: 81ms
+[METRICS] Fire at Zone 4 extinguished! Response time: 1670ms
+[METRICS] Drone 5 returned to base at 20:32:16.309
+[METRICS] Drone 1 returned to base at 20:32:16.811
+[METRICS] Fire at Zone 2 extinguished! Response time: 1310ms
+[METRICS] Drone 12 returned to base at 20:32:16.902
+[METRICS] Drone 9 returned to base at 20:32:17.873
+[METRICS] Drone 2 returned to base at 20:32:18.043
+[METRICS] Drone 3 returned to base at 20:32:18.126
+[METRICS] Fire detected at Zone 5 (High) at 20:32:18.617
+[METRICS] Drone 2 dispatched to Zone 5 at 20:32:18.617
+[METRICS] Drone 1 returned to base at 20:32:19.490
+[METRICS] Fire detected at Zone 5 (High) at 20:32:20.355
+[METRICS] Drone 1 dispatched to Zone 5 at 20:32:20.355
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:32:22.288
+[METRICS] Drone 3 dispatched to Zone 5 at 20:32:22.288
+[METRICS] Drone 1 returned to base at 20:32:24.016
+[METRICS] Fire detected at Zone 5 (Low) at 20:32:24.225
+[METRICS] Drone 1 dispatched to Zone 5 at 20:32:24.225
+[METRICS] Drone 3 returned to base at 20:32:25.947
+[METRICS] Fire at Zone 5 extinguished! Response time: 1797ms
+[METRICS] Drone 1 returned to base at 20:32:27.747
+[METRICS] Fire detected at Zone 2 (Low) at 20:32:28.494
+[METRICS] Drone 1 dispatched to Zone 2 at 20:32:28.494
+[METRICS] Fire detected at Zone 3 (Moderate) at 20:32:29.429
+[METRICS] Drone 3 dispatched to Zone 3 at 20:32:29.429
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:32:29.530
+[METRICS] Drone 4 dispatched to Zone 4 at 20:32:29.530
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:32:29.539
+[METRICS] Drone 4 dispatched to Zone 4 at 20:32:29.539
+[METRICS] Fire at Zone 2 extinguished! Response time: 1305ms
+[METRICS] Fire detected at Zone 3 (Low) at 20:32:30.691
+[METRICS] Drone 5 dispatched to Zone 3 at 20:32:30.691
+[METRICS] Drone 1 returned to base at 20:32:31.036
+[METRICS] Drone 3 returned to base at 20:32:31.745
+[METRICS] Fire at Zone 3 extinguished! Response time: 1130ms
+[METRICS] Drone 5 returned to base at 20:32:32.879
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:32:41.549
+[METRICS] Drone 1 dispatched to Zone 4 at 20:32:41.549
+[METRICS] Fire detected at Zone 4 (Low) at 20:32:43.352
+[METRICS] Drone 3 dispatched to Zone 4 at 20:32:43.352
+[METRICS] Drone 4 returned to base at 20:32:44.557
+[METRICS] Drone 1 returned to base at 20:32:44.948
+[METRICS] Fire at Zone 4 extinguished! Response time: 1668ms
+[METRICS] Drone 3 returned to base at 20:32:46.618
+[METRICS] Drone 4 returned to base at 20:32:47.954
+[METRICS] Fire detected at Zone 2 (Low) at 20:32:48.669
+[METRICS] Drone 1 dispatched to Zone 2 at 20:32:48.669
+[METRICS] Fire detected at Zone 5 (High) at 20:32:49.868
+[METRICS] Drone 3 dispatched to Zone 5 at 20:32:49.868
+[METRICS] Fire at Zone 2 extinguished! Response time: 1305ms
+[METRICS] Drone 1 returned to base at 20:32:51.214
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:32:51.800
+[METRICS] Drone 1 dispatched to Zone 5 at 20:32:51.800
+[METRICS] Drone 3 returned to base at 20:32:53.525
+[METRICS] Fire detected at Zone 5 (Low) at 20:32:53.734
+[METRICS] Drone 3 dispatched to Zone 5 at 20:32:53.734
+[METRICS] Drone 1 returned to base at 20:32:55.459
+[METRICS] Fire at Zone 5 extinguished! Response time: 1797ms
+[METRICS] Drone 3 returned to base at 20:32:57.258
+[METRICS] Fire detected at Zone 4 (High) at 20:33:15.839
+[METRICS] Drone 1 dispatched to Zone 4 at 20:33:15.839
+[METRICS] Fire detected at Zone 3 (Moderate) at 20:33:16.630
+[METRICS] Drone 3 dispatched to Zone 3 at 20:33:16.630
+[METRICS] Fire detected at Zone 4 (High) at 20:33:16.863
+[METRICS] Drone 4 dispatched to Zone 4 at 20:33:16.863
+[METRICS] Fire detected at Zone 4 (High) at 20:33:16.875
+[METRICS] Drone 4 dispatched to Zone 4 at 20:33:16.875
+[METRICS] Fire detected at Zone 3 (Low) at 20:33:17.893
+[METRICS] Drone 5 dispatched to Zone 3 at 20:33:17.893
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:33:18.666
+[METRICS] Drone 6 dispatched to Zone 4 at 20:33:18.666
+[METRICS] Drone 3 returned to base at 20:33:18.948
+[METRICS] Fire at Zone 3 extinguished! Response time: 1127ms
+[METRICS] Fire at Zone 1 extinguished! Response time: 112955ms
+[METRICS] Drone 5 returned to base at 20:33:20.077
+[METRICS] Drone 1 returned to base at 20:33:20.295
+[METRICS] Fire detected at Zone 4 (Low) at 20:33:20.472
+[METRICS] Drone 1 dispatched to Zone 4 at 20:33:20.472
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:33:22.066
+[METRICS] Drone 3 dispatched to Zone 4 at 20:33:22.066
+[METRICS] Drone 6 returned to base at 20:33:22.073
+[METRICS] Fire at Zone 4 extinguished! Response time: 72ms
+[METRICS] Drone 4 returned to base at 20:33:23.662
+[METRICS] Drone 1 returned to base at 20:33:23.734
+[METRICS] Fire detected at Zone 4 (Low) at 20:33:23.869
+[METRICS] Drone 1 dispatched to Zone 4 at 20:33:23.869
+[METRICS] Drone 3 returned to base at 20:33:25.462
+[METRICS] Fire at Zone 4 extinguished! Response time: 1667ms
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:33:25.571
+[METRICS] Drone 3 dispatched to Zone 2 at 20:33:25.571
+[METRICS] Fire detected at Zone 2 (Low) at 20:33:27.017
+[METRICS] Drone 4 dispatched to Zone 2 at 20:33:27.017
+[METRICS] Drone 1 returned to base at 20:33:27.133
+[METRICS] Drone 3 returned to base at 20:33:28.253
+[METRICS] Fire at Zone 2 extinguished! Response time: 1308ms
+[METRICS] Drone 4 returned to base at 20:33:29.565
+[METRICS] Fire detected at Zone 5 (High) at 20:33:43.972
+[METRICS] Drone 1 dispatched to Zone 5 at 20:33:43.972
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:33:45.903
+[METRICS] Drone 3 dispatched to Zone 5 at 20:33:45.903
+[METRICS] Drone 1 returned to base at 20:33:47.630
+[METRICS] Fire detected at Zone 5 (Low) at 20:33:47.835
+[METRICS] Drone 1 dispatched to Zone 5 at 20:33:47.835
+[METRICS] Drone 3 returned to base at 20:33:49.558
+[METRICS] Fire at Zone 5 extinguished! Response time: 1801ms
+[METRICS] Drone 1 returned to base at 20:33:51.359
+[METRICS] Fire detected at Zone 4 (High) at 20:33:56.945
+[METRICS] Drone 1 dispatched to Zone 4 at 20:33:56.945
+[METRICS] Fire detected at Zone 4 (High) at 20:33:56.954
+[METRICS] Drone 1 dispatched to Zone 4 at 20:33:56.954
+[METRICS] Fire detected at Zone 3 (Moderate) at 20:33:57.084
+[METRICS] Drone 3 dispatched to Zone 3 at 20:33:57.084
+[METRICS] Fire detected at Zone 3 (Low) at 20:33:58.343
+[METRICS] Drone 4 dispatched to Zone 3 at 20:33:58.343
+[METRICS] Drone 3 returned to base at 20:33:59.396
+[METRICS] Fire at Zone 3 extinguished! Response time: 1127ms
+[METRICS] Drone 4 returned to base at 20:34:00.525
+[METRICS] Fire detected at Zone 2 (Low) at 20:34:02.284
+[METRICS] Drone 3 dispatched to Zone 2 at 20:34:02.284
+[METRICS] Fire at Zone 2 extinguished! Response time: 1306ms
+[METRICS] Drone 3 returned to base at 20:34:04.830
+[METRICS] Fire detected at Zone 4 (High) at 20:34:08.963
+[METRICS] Drone 1 dispatched to Zone 4 at 20:34:08.963
+[METRICS] Fire detected at Zone 4 (High) at 20:34:11.477
+[METRICS] Drone 3 dispatched to Zone 4 at 20:34:11.477
+[METRICS] Fire detected at Zone 4 (Low) at 20:34:11.879
+[METRICS] Drone 4 dispatched to Zone 4 at 20:34:11.879
+[METRICS] Fire detected at Zone 1 (Moderate) at 20:34:11.963
+[METRICS] Drone 5 dispatched to Zone 1 at 20:34:11.963
+[METRICS] Fire detected at Zone 1 (Moderate) at 20:34:11.970
+[METRICS] Drone 5 dispatched to Zone 1 at 20:34:11.970
+[METRICS] Drone 1 returned to base at 20:34:11.984
+[METRICS] Fire detected at Zone 1 (Low) at 20:34:12.669
+[METRICS] Drone 6 dispatched to Zone 1 at 20:34:12.669
+[METRICS] Drone 5 returned to base at 20:34:13.167
+[METRICS] Fire at Zone 1 extinguished! Response time: 573ms
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:34:13.280
+[METRICS] Drone 7 dispatched to Zone 4 at 20:34:13.280
+[METRICS] Fire at Zone 4 extinguished! Response time: 267ms
+[METRICS] Drone 6 returned to base at 20:34:13.742
+[METRICS] Drone 5 returned to base at 20:34:14.360
+[METRICS] Drone 3 returned to base at 20:34:14.874
+[METRICS] Fire detected at Zone 4 (Low) at 20:34:15.081
+[METRICS] Drone 3 dispatched to Zone 4 at 20:34:15.081
+[METRICS] Drone 4 returned to base at 20:34:15.146
+[METRICS] Drone 1 returned to base at 20:34:15.374
+[METRICS] Fire detected at Zone 4 (Low) at 20:34:15.648
+[METRICS] Drone 4 dispatched to Zone 4 at 20:34:15.648
+[METRICS] Drone 7 returned to base at 20:34:16.676
+[METRICS] Fire at Zone 4 extinguished! Response time: 1101ms
+[METRICS] Fire at Zone 4 extinguished! Response time: 1666ms
+[METRICS] Drone 3 returned to base at 20:34:18.346
+[METRICS] Drone 1 returned to base at 20:34:18.767
+[METRICS] Fire at Zone 1 extinguished! Response time: 6239ms
+[METRICS] Drone 4 returned to base at 20:34:18.915
+[METRICS] Drone 3 returned to base at 20:34:19.407
+[METRICS] Fire detected at Zone 5 (High) at 20:34:27.908
+[METRICS] Drone 3 dispatched to Zone 5 at 20:34:27.908
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:34:29.840
+[METRICS] Drone 4 dispatched to Zone 5 at 20:34:29.840
+[METRICS] Fire detected at Zone 4 (High) at 20:34:31.338
+[METRICS] Drone 5 dispatched to Zone 4 at 20:34:31.338
+[METRICS] Fire detected at Zone 5 (Low) at 20:34:31.774
+[METRICS] Drone 6 dispatched to Zone 5 at 20:34:31.774
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:34:33.140
+[METRICS] Drone 7 dispatched to Zone 4 at 20:34:33.140
+[METRICS] Drone 4 returned to base at 20:34:33.497
+[METRICS] Fire at Zone 5 extinguished! Response time: 1795ms
+[METRICS] Drone 5 returned to base at 20:34:34.738
+[METRICS] Fire detected at Zone 4 (Low) at 20:34:34.943
+[METRICS] Drone 4 dispatched to Zone 4 at 20:34:34.943
+[METRICS] Drone 6 returned to base at 20:34:35.297
+[METRICS] Drone 7 returned to base at 20:34:36.537
+[METRICS] Fire at Zone 4 extinguished! Response time: 1664ms
+[METRICS] Drone 4 returned to base at 20:34:38.206
+[METRICS] Fire detected at Zone 2 (Low) at 20:34:40.128
+[METRICS] Drone 4 dispatched to Zone 2 at 20:34:40.128
+[METRICS] Fire at Zone 2 extinguished! Response time: 1304ms
+[METRICS] Drone 4 returned to base at 20:34:42.666
+[METRICS] Fire detected at Zone 5 (High) at 20:34:43.403
+[METRICS] Drone 4 dispatched to Zone 5 at 20:34:43.403
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:34:45.335
+[METRICS] Drone 5 dispatched to Zone 5 at 20:34:45.335
+[METRICS] Drone 4 returned to base at 20:34:47.056
+[METRICS] Fire detected at Zone 1 (High) at 20:34:47.150
+[METRICS] Drone 4 dispatched to Zone 1 at 20:34:47.150
+[METRICS] Fire detected at Zone 5 (Low) at 20:34:47.266
+[METRICS] Drone 6 dispatched to Zone 5 at 20:34:47.266
+[METRICS] Fire detected at Zone 1 (Moderate) at 20:34:47.854
+[METRICS] Drone 7 dispatched to Zone 1 at 20:34:47.854
+[METRICS] Fire detected at Zone 5 (Low) at 20:34:48.197
+[METRICS] Drone 8 dispatched to Zone 5 at 20:34:48.197
+[METRICS] Drone 4 returned to base at 20:34:48.347
+[METRICS] Fire detected at Zone 1 (Low) at 20:34:48.558
+[METRICS] Drone 4 dispatched to Zone 1 at 20:34:48.558
+[METRICS] Drone 5 returned to base at 20:34:48.994
+[METRICS] Drone 7 returned to base at 20:34:49.057
+[METRICS] Fire at Zone 5 extinguished! Response time: 866ms
+[METRICS] Fire at Zone 1 extinguished! Response time: 567ms
+[METRICS] Drone 4 returned to base at 20:34:49.617
+[METRICS] Fire at Zone 5 extinguished! Response time: 1795ms
+[METRICS] Drone 6 returned to base at 20:34:50.793
+[METRICS] Drone 8 returned to base at 20:34:51.727
+[METRICS] Fire detected at Zone 4 (High) at 20:34:53.010
+[METRICS] Drone 4 dispatched to Zone 4 at 20:34:53.010
+[METRICS] Fire detected at Zone 4 (High) at 20:34:53.019
+[METRICS] Drone 4 dispatched to Zone 4 at 20:34:53.019
+[METRICS] Drone 6 returned to base at 20:34:53.110
+[METRICS] Fire detected at Zone 3 (Low) at 20:34:59.709
+[METRICS] Drone 5 dispatched to Zone 3 at 20:34:59.709
+[METRICS] Fire at Zone 3 extinguished! Response time: 1126ms
+[METRICS] Fire detected at Zone 5 (High) at 20:35:01.092
+[METRICS] Drone 6 dispatched to Zone 5 at 20:35:01.092
+[METRICS] Fire detected at Zone 4 (High) at 20:35:01.380
+[METRICS] Drone 7 dispatched to Zone 4 at 20:35:01.380
+[METRICS] Drone 5 returned to base at 20:35:01.891
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:35:03.024
+[METRICS] Drone 5 dispatched to Zone 5 at 20:35:03.024
+[METRICS] Fire detected at Zone 4 (Moderate) at 20:35:03.182
+[METRICS] Drone 8 dispatched to Zone 4 at 20:35:03.182
+[METRICS] Drone 6 returned to base at 20:35:04.752
+[METRICS] Drone 7 returned to base at 20:35:04.779
+[METRICS] Fire detected at Zone 5 (Low) at 20:35:04.954
+[METRICS] Drone 6 dispatched to Zone 5 at 20:35:04.954
+[METRICS] Fire detected at Zone 4 (Low) at 20:35:04.986
+[METRICS] Drone 7 dispatched to Zone 4 at 20:35:04.986
+[METRICS] Fire detected at Zone 1 (Low) at 20:35:05.025
+[METRICS] Drone 4 dispatched to Zone 1 at 20:35:05.025
+[METRICS] Drone 8 returned to base at 20:35:06.581
+[METRICS] Fire at Zone 4 extinguished! Response time: 1665ms
+[METRICS] Drone 5 returned to base at 20:35:06.683
+[METRICS] Fire at Zone 5 extinguished! Response time: 1800ms
+[METRICS] Fire detected at Zone 2 (High) at 20:35:07.031
+[METRICS] Drone 5 dispatched to Zone 2 at 20:35:07.031
+[METRICS] Fire detected at Zone 1 (Low) at 20:35:08.026
+[METRICS] Drone 8 dispatched to Zone 1 at 20:35:08.026
+[METRICS] Drone 4 returned to base at 20:35:08.046
+[METRICS] Drone 7 returned to base at 20:35:08.248
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:35:08.476
+[METRICS] Drone 7 dispatched to Zone 2 at 20:35:08.476
+[METRICS] Drone 6 returned to base at 20:35:08.485
+[METRICS] Fire detected at Zone 4 (Low) at 20:35:08.571
+[METRICS] Drone 6 dispatched to Zone 4 at 20:35:08.571
+[METRICS] Fire at Zone 1 extinguished! Response time: 569ms
+[METRICS] Drone 8 returned to base at 20:35:09.094
+[METRICS] Fire detected at Zone 2 (Low) at 20:35:09.918
+[METRICS] Drone 8 dispatched to Zone 2 at 20:35:09.918
+[METRICS] Fire at Zone 4 extinguished! Response time: 1668ms
+[METRICS] Drone 7 returned to base at 20:35:11.151
+[METRICS] Fire at Zone 2 extinguished! Response time: 1307ms
+[METRICS] Drone 4 returned to base at 20:35:11.432
+[METRICS] Drone 6 returned to base at 20:35:11.835
+[METRICS] Fire at Zone 1 extinguished! Response time: 3971ms
+[METRICS] Drone 8 returned to base at 20:35:12.462
+[METRICS] Drone 4 returned to base at 20:35:12.496
+[METRICS] Fire at Zone 1 extinguished! Response time: 5033ms
+[METRICS] Drone 4 returned to base at 20:35:13.556
+[METRICS] Fire detected at Zone 2 (High) at 20:35:21.600
+[METRICS] Drone 4 dispatched to Zone 2 at 20:35:21.600
+[METRICS] Fire detected at Zone 1 (Moderate) at 20:35:22.441
+[METRICS] Drone 6 dispatched to Zone 1 at 20:35:22.441
+[METRICS] Fire detected at Zone 2 (Moderate) at 20:35:23.040
+[METRICS] Drone 7 dispatched to Zone 2 at 20:35:23.040
+[METRICS] Fire detected at Zone 1 (Low) at 20:35:23.142
+[METRICS] Drone 8 dispatched to Zone 1 at 20:35:23.142
+[METRICS] Fire detected at Zone 3 (High) at 20:35:23.623
+[METRICS] Drone 9 dispatched to Zone 3 at 20:35:23.623
+[METRICS] Drone 6 returned to base at 20:35:23.639
+[METRICS] Fire at Zone 1 extinguished! Response time: 571ms
+[METRICS] Drone 8 returned to base at 20:35:24.210
+[METRICS] Drone 4 returned to base at 20:35:24.273
+[METRICS] Fire detected at Zone 2 (Low) at 20:35:24.486
+[METRICS] Drone 4 dispatched to Zone 2 at 20:35:24.486
+[METRICS] Fire detected at Zone 3 (Moderate) at 20:35:24.889
+[METRICS] Drone 6 dispatched to Zone 3 at 20:35:24.889
+[METRICS] Drone 7 returned to base at 20:35:25.722
+[METRICS] Fire at Zone 2 extinguished! Response time: 1308ms
+[METRICS] Drone 9 returned to base at 20:35:25.946
+[METRICS] Fire detected at Zone 3 (Low) at 20:35:26.152
+[METRICS] Drone 7 dispatched to Zone 3 at 20:35:26.152
+[METRICS] Drone 4 returned to base at 20:35:27.026
+[METRICS] Drone 6 returned to base at 20:35:27.206
+[METRICS] Fire at Zone 3 extinguished! Response time: 1125ms
+[METRICS] Drone 7 returned to base at 20:35:28.334
+[METRICS] Fire detected at Zone 5 (Moderate) at 20:35:43.242
+[METRICS] Drone 4 dispatched to Zone 5 at 20:35:43.242
+[METRICS] Fire detected at Zone 5 (Low) at 20:35:45.175
+[METRICS] Drone 6 dispatched to Zone 5 at 20:35:45.175
+[METRICS] Drone 4 returned to base at 20:35:46.901
+[METRICS] Fire at Zone 5 extinguished! Response time: 1799ms
+[METRICS] Drone 6 returned to base at 20:35:48.699
+
+============================================================
+PERFORMANCE METRICS REPORT
+============================================================
+
+--- OVERALL STATISTICS ---
+First fire detected: 20:31:01.163
+Last fire extinguished: 20:35:46.974
+Total simulation time: 285811ms
+Total fires extinguished: 5
+
+--- DRONE PERFORMANCE ---
+
+Drone 1:
+  Missions completed: 23
+  Total flight time: 78710ms
+  Total idle time: 66607ms
+  Utilization: 54.2%
+
+Drone 2:
+  Missions completed: 10
+  Total flight time: 70316ms
+  Total idle time: 42543ms
+  Utilization: 62.3%
+
+Drone 3:
+  Missions completed: 23
+  Total flight time: 74699ms
+  Total idle time: 68751ms
+  Utilization: 52.1%
+
+Drone 4:
+  Missions completed: 25
+  Total flight time: 120480ms
+  Total idle time: 85164ms
+  Utilization: 58.6%
+
+Drone 5:
+  Missions completed: 13
+  Total flight time: 35234ms
+  Total idle time: 34037ms
+  Utilization: 50.9%
+
+Drone 6:
+  Missions completed: 13
+  Total flight time: 44124ms
+  Total idle time: 40597ms
+  Utilization: 52.1%
+
+Drone 7:
+  Missions completed: 11
+  Total flight time: 31212ms
+  Total idle time: 31212ms
+  Utilization: 50.0%
+
+Drone 8:
+  Missions completed: 8
+  Total flight time: 20141ms
+  Total idle time: 20141ms
+  Utilization: 50.0%
+
+Drone 9:
+  Missions completed: 4
+  Total flight time: 12924ms
+  Total idle time: 12924ms
+  Utilization: 50.0%
+
+Drone 10:
+  Missions completed: 2
+  Total flight time: 6935ms
+  Total idle time: 6935ms
+  Utilization: 50.0%
+
+Drone 11:
+  Missions completed: 1
+  Total flight time: 3666ms
+  Total idle time: 3666ms
+  Utilization: 50.0%
+
+Drone 12:
+  Missions completed: 3
+  Total flight time: 8904ms
+  Total idle time: 8904ms
+  Utilization: 50.0%
+
+Drone 13:
+  Missions completed: 2
+  Total flight time: 5995ms
+  Total idle time: 5995ms
+  Utilization: 50.0%
+
+Drone 14:
+  Missions completed: 3
+  Total flight time: 13665ms
+  Total idle time: 10006ms
+  Utilization: 57.7%
+
+Drone 15:
+  Missions completed: 2
+  Total flight time: 6218ms
+  Total idle time: 6218ms
+  Utilization: 50.0%
+
+--- FIRE RESPONSE TIMES ---
+Zone 1: 571ms
+Zone 2: 1308ms
+Zone 3: 1125ms
+Zone 4: 1668ms
+Zone 5: 1799ms
+
+Average response time: 1294.20ms
+============================================================
+============================================================
+METRICS LOG CLOSED: 20:35:48.711
+============================================================

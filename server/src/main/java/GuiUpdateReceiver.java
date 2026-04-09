@@ -2,7 +2,7 @@ import java.net.*;
 
 public class GuiUpdateReceiver implements Runnable {
     private static final byte TYPE_GUI_UPDATE = 0x04;
-    private static final byte TYPE_SHUTDOWN   = 0x0F;
+    private static final byte TYPE_SHUTDOWN   = 0x05;
 
     private final FireDroneGUI gui;
     private volatile boolean running = true;

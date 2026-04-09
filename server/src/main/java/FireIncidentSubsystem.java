@@ -62,6 +62,7 @@ public class FireIncidentSubsystem implements Runnable {
                         try {
                             sendZones();
                             sendFireEvents();
+                            sendAllEventsSentSignal(socket);
                             transition(FireIncidentState.WAITING);
                         } catch (Exception e) {
                             gui.logError("Error in SENDING:" + e.getMessage());
@@ -211,6 +212,16 @@ public class FireIncidentSubsystem implements Runnable {
             }
         } catch (Exception e) {
             System.out.println("[ERROR] FireIncidentSubsystem - sendFireEvents: " + e.getMessage());
+        }
+    }
+
+    private void sendAllEventsSentSignal(DatagramSocket socket) {
+        try {
+            byte[] data = new byte[]{ TYPE_SHUTDOWN };
+            socket.send(new DatagramPacket(data, data.length, intermediate, PORT_SCHEDULER_FIRE));
+            gui.log("[FIRE] All events sent — shutdown signal sent to Scheduler.");
+        } catch (Exception e) {
+            gui.logError("[FIRE] Failed to send shutdown signal: " + e.getMessage());
         }
     }
 
