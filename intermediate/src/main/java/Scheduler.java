@@ -478,15 +478,10 @@ public class Scheduler implements Runnable {
         }
     }
 
-    /** Timestamped structured log line for key scheduler events. */
     private void log(String msg) {
         System.out.println("[" + TS.format(new Date()) + "] [SCHEDULER] " + msg);
     }
 
-    /**
-     * Sends a TYPE_SHUTDOWN packet to every known drone and to the GUI server.
-     * Called once, just before the scheduler closes its sockets.
-     */
     private void sendShutdown() {
         byte[] data = new byte[]{ TYPE_SHUTDOWN };
 
